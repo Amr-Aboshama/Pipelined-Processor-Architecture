@@ -41,6 +41,9 @@ port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 end decode_stage;
 
 architecture decode of decode_stage is
+	signal R0,R1,R2,R3,R4,R5,R6,R7: std_logic_vector(31 downto 0);
+	signal R0_in,R1_in,R2_in,R3_in,R4_in,R5_in,R6_in,R7_in: std_logic_vector(31 downto 0);
+	signal en0,en1,en2,en3,en4,en5,en6,en7: std_logic;
 begin
 
 --    	ex <= 	"100000" when 	ir(31 downto 27) = "00100"	else	--IN
@@ -99,8 +102,102 @@ begin
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		(others => '0');
 
+
+	u0: entity work.Reg port map(clk,rst,en0,R0_in,R0);
+	u1: entity work.Reg port map(clk,rst,en1,R1_in,R1);
+	u2: entity work.Reg port map(clk,rst,en2,R2_in,R2);
+	u3: entity work.Reg port map(clk,rst,en3,R3_in,R3);
+	u4: entity work.Reg port map(clk,rst,en4,R4_in,R4);
+	u5: entity work.Reg port map(clk,rst,en5,R5_in,R5);
+	u6: entity work.Reg port map(clk,rst,en6,R6_in,R6);
+	u7: entity work.Reg port map(clk,rst,en7,R7_in,R7);
+
+
 	Rdst_num  <= ir(26 downto 24);
 	Rsrc1_num <= ir(23 downto 21);
 	Rsrc2_num <= ir(20 downto 18);
+	
+	Rsrc1 <= 	R0 when ir(23 downto 21) = "000" else
+			R1 when ir(23 downto 21) = "001" else
+			R2 when ir(23 downto 21) = "010" else
+			R3 when ir(23 downto 21) = "011" else
+			R4 when ir(23 downto 21) = "100" else
+			R5 when ir(23 downto 21) = "101" else
+			R6 when ir(23 downto 21) = "110" else
+			R7;
+
+	Rsrc2 <= 	R0 when ir(20 downto 18) = "000" else
+			R1 when ir(20 downto 18) = "001" else
+			R2 when ir(20 downto 18) = "010" else
+			R3 when ir(20 downto 18) = "011" else
+			R4 when ir(20 downto 18) = "100" else
+			R5 when ir(20 downto 18) = "101" else
+			R6 when ir(20 downto 18) = "110" else
+			R7;
+
+	R0_in <= 	dst1_result when dst1_num = "000" else
+			dst2_result when dst2_num = "000" else
+			(others => '0');
+
+	R1_in <= 	dst1_result when dst1_num = "001" else
+			dst2_result when dst2_num = "001" else
+			(others => '0');
+
+	R2_in <= 	dst1_result when dst1_num = "010" else
+			dst2_result when dst2_num = "010" else
+			(others => '0');
+
+	R3_in <= 	dst1_result when dst1_num = "011" else
+			dst2_result when dst2_num = "011" else
+			(others => '0');
+
+	R4_in <= 	dst1_result when dst1_num = "100" else
+			dst2_result when dst2_num = "100" else
+			(others => '0');
+
+	R5_in <= 	dst1_result when dst1_num = "101" else
+			dst2_result when dst2_num = "101" else
+			(others => '0');
+
+	R6_in <= 	dst1_result when dst1_num = "110" else
+			dst2_result when dst2_num = "110" else
+			(others => '0');
+
+	R7_in <= 	dst1_result when dst1_num = "111" else
+			dst2_result when dst2_num = "111" else
+			(others => '0');
+
+	en0 <=		'1' when (dst1_num = "000" and dst1_en = '1') or
+				 (dst2_num = "000" and dst2_en = '1') else
+			'0';
+	
+	en1 <=		'1' when (dst1_num = "001" and dst1_en = '1') or
+				 (dst2_num = "001" and dst2_en = '1') else
+			'0';
+
+	en2 <=		'1' when (dst1_num = "010" and dst1_en = '1') or
+				 (dst2_num = "010" and dst2_en = '1') else
+			'0';
+
+	en3 <=		'1' when (dst1_num = "011" and dst1_en = '1') or
+				 (dst2_num = "011" and dst2_en = '1') else
+			'0';
+
+	en4 <=		'1' when (dst1_num = "100" and dst1_en = '1') or
+				 (dst2_num = "100" and dst2_en = '1') else
+			'0';
+
+	en5 <=		'1' when (dst1_num = "101" and dst1_en = '1') or
+				 (dst2_num = "101" and dst2_en = '1') else
+			'0';
+
+	en6 <=		'1' when (dst1_num = "110" and dst1_en = '1') or
+				 (dst2_num = "110" and dst2_en = '1') else
+			'0';
+
+	en7 <=		'1' when (dst1_num = "111" and dst1_en = '1') or
+				 (dst2_num = "111" and dst2_en = '1') else
+			'0';
+
 
 end decode;
