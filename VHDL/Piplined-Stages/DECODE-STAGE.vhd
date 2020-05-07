@@ -17,7 +17,7 @@ use ieee.std_logic_1164.all;
 --	ext		(32 bits)	
 --	Rsrc2 		(32 bits),	Rsrc1 		(32 bits)
 --	Rscr2_num 	(3 bits),	Rsrc1_num 	(3 bits)
---	Rdst1_num 	(3 bits),	Rdst2_num 	(3 bits)
+--	Rdst_num 	(3 bits),
 --	WB 		(5 bits),	M 		(4 bits),	EX 		(6 bits)
 
 -- Output bits to others
@@ -33,7 +33,7 @@ port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	ext,Rsrc2,Rsrc1:				out std_logic_vector(31 downto 0);
 	jump_cat,uncond_jump:			out std_logic;
 	src_hazard:					out std_logic_vector(1 downto 0);
-	Rsrc1_num,Rsrc2_num,Rdst1_num,Rdst2_num:	out std_logic_vector(2 downto 0);
+	Rsrc1_num,Rsrc2_num,Rdst_num:	out std_logic_vector(2 downto 0);
 	m:						out std_logic_vector(3 downto 0);
 	wb:						out std_logic_vector(4 downto 0);
 	ex:						out std_logic_vector(5 downto 0)
@@ -92,10 +92,15 @@ begin
 				ir(29 downto 27) /= "000"	else	--JMP - CALL - RET - RTI
 		"00000";
 		
-	ext <=	"0000000000000000" & ir(15 downto 0) when 
+	ext <=	"0000000000000000" & ir(15 downto 0) when 		--Immediate
 			(ir(31 downto 29) = "011" and ((ir(28) or ir(27))='1')) or	--IADD - SHL - SHR
-			ir(31 downto 27) = "10111"	else	--LDM
-		"000000000000" & ir(19 downto 0) when 
+			ir(31 downto 27) = "10111"	else				--LDM
+		"000000000000" & ir(19 downto 0) when			--EA 
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		(others => '0');
+
+	Rdst_num  <= ir(26 downto 24);
+	Rsrc1_num <= ir(23 downto 21);
+	Rsrc2_num <= ir(20 downto 18);
+
 end decode;
