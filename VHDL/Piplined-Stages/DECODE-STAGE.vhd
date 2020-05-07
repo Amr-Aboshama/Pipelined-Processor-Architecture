@@ -24,10 +24,12 @@ use ieee.std_logic_1164.all;
 --	jump_cat,	(1 bit),	uncond_jump	(1 bit)
 
 entity decode_stage is
-port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
+port(	ir,pc,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	dst1_num,dst2_num:				in std_logic_vector(2 downto 0);
 	enable,src1_exist,src2_exist,dst1_en,dst2_en:	in std_logic;
-	clk, rst,intr,zero_flag,hazard_detected:	in std_logic;
+	clk, rst,hazard_detected:			in std_logic;
+	intr:						in std_logic_vector(1 downto 0);
+	flag_reg:					in std_logic_vector(3 downto 0);
 
 	ext,Rsrc2,Rsrc1:				out std_logic_vector(31 downto 0);
 	jump_cat,uncond_jump:				out std_logic;
@@ -39,9 +41,12 @@ port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 end decode_stage;
 
 architecture decode of decode_stage is
+	signal Rsrc1_temp: std_logic_vector(31 downto 0);
 	signal R0,R1,R2,R3,R4,R5,R6,R7: std_logic_vector(31 downto 0);
 	signal R0_in,R1_in,R2_in,R3_in,R4_in,R5_in,R6_in,R7_in: std_logic_vector(31 downto 0);
 	signal en0,en1,en2,en3,en4,en5,en6,en7: std_logic;
+
+	constant ZERO : std_logic_vector(31 downto 0) := (others => '0');
 begin
 
 --    	ex <= 	"100000" when 	ir(31 downto 27) = "00100"	else	--IN
@@ -94,12 +99,12 @@ begin
 				ir(29 downto 27) /= "000"	else	--JMP - CALL - RET - RTI
 		"00000";
 		
-	ext <=	"0000000000000000" & ir(15 downto 0) when 		--Immediate
+	ext <=	zero(15 downto 0) & ir(15 downto 0) when 		--Immediate
 			(ir(31 downto 29) = "011" and ((ir(28) or ir(27))='1')) or	--IADD - SHL - SHR
 			ir(31 downto 27) = "10111"	else				--LDM
-		"000000000000" & ir(19 downto 0) when			--EA 
+		zero(11 downto 0) & ir(19 downto 0) when			--EA 
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
-		(others => '0');
+		zero;
 
 	jump_cat <=	'1' when ir(31 downto 30) = "11" else	--JZ - JMP - CALL - RET - RTI
 			'0';
@@ -122,7 +127,7 @@ begin
 	Rsrc1_num <= ir(23 downto 21);
 	Rsrc2_num <= ir(20 downto 18);
 	
-	Rsrc1 <= 	R0 when ir(23 downto 21) = "000" else
+	Rsrc1_temp <= 	R0 when ir(23 downto 21) = "000" else
 			R1 when ir(23 downto 21) = "001" else
 			R2 when ir(23 downto 21) = "010" else
 			R3 when ir(23 downto 21) = "011" else
@@ -139,6 +144,12 @@ begin
 			R5 when ir(20 downto 18) = "101" else
 			R6 when ir(20 downto 18) = "110" else
 			R7;
+------- to handle interrupt -------
+	Rsrc1 <=	Rsrc1_temp 	when intr = "00" else
+			zero(27 downto 0) & flag_reg 	when intr = "01" else
+			pc 		when intr = "10" else
+			zero; 
+			
 
 	R0_in <= 	dst1_result when dst1_num = "000" else
 			dst2_result when dst2_num = "000" else
