@@ -28,7 +28,7 @@ use ieee.std_logic_1164.all;
 entity decode_stage is
 port(	pc_in,ir,dst1_result,dst2_result:		in std_logic_vector(31 downto 0);
 	dst1_num,dst2_num:				in std_logic_vector(2 downto 0);
-	src1_exist,src2_exist,dst1_en,dst2_en:		in std_logic;
+	enable,src1_exist,src2_exist,dst1_en,dst2_en:	in std_logic;
 	clk, rst,intr,zero_flag,hazard_detected:	in std_logic;
 
 	pc_out,extend,Rsrc2,Rsrc1:			out std_logic_vector(31 downto 0);
@@ -39,3 +39,10 @@ port(	pc_in,ir,dst1_result,dst2_result:		in std_logic_vector(31 downto 0);
 	ex:						out std_logic_vector(4 downto 0)
 );
 end decode_stage;
+
+architecture decode of decode_stage is
+begin
+
+    pc_out <= pc_in;
+
+end decode;
