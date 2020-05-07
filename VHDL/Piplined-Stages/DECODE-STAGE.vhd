@@ -43,19 +43,31 @@ end decode_stage;
 architecture decode of decode_stage is
 begin
 
-    	ex <= 	"100000" when 	ir(31 downto 27) = "00100"	else	--IN
-		"000001" when 	ir(31 downto 27) = "00001"	else	--NOT
-		"000010" when 	ir(31 downto 27) = "00010"	else	--INC
-		"000011" when	ir(31 downto 27) = "00011"	else	--DEC
-		"001000" when	ir(31 downto 27) = "01000"	else	--AND
-		"001001" when	ir(31 downto 27) = "01001"	else	--OR
-		"001010" when	ir(31 downto 27) = "01010"	else	--ADD
-		"001011" when 	ir(31 downto 27) = "01011"	else	--SUB
-		"001101" when	ir(31 downto 27) = "01101"	else 	--IADD
-		"001110" when 	ir(31 downto 27) = "01110"	else	--SHL
-		"001111" when	ir(31 downto 27) = "01111"	else	--SHR
-		"010000" when	ir(31 downto 27) = "11000"	else	--JZ
-		"000000";
+--    	ex <= 	"100000" when 	ir(31 downto 27) = "00100"	else	--IN
+--		"000001" when 	ir(31 downto 27) = "00001"	else	--NOT
+--		"000010" when 	ir(31 downto 27) = "00010"	else	--INC
+--		"000011" when	ir(31 downto 27) = "00011"	else	--DEC
+--
+--		"001000" when	ir(31 downto 27) = "01000"	else	--AND
+--		"001001" when	ir(31 downto 27) = "01001"	else	--OR
+--		"001010" when	ir(31 downto 27) = "01010"	else	--ADD
+--		"001011" when 	ir(31 downto 27) = "01011"	else	--SUB
+--		"001101" when	ir(31 downto 27) = "01101"	else 	--IADD
+--		"001110" when 	ir(31 downto 27) = "01110"	else	--SHL
+--		"001111" when	ir(31 downto 27) = "01111"	else	--SHR
+--
+--		"010000" when	ir(31 downto 27) = "11000"	else	--JZ
+--		"000000";
+--
+	ex(5) <= 	  '1' when ir(31 downto 27) = "00100"				else	--IN
+			  '0';
+
+	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "11000"			else	--JZ
+			  ir(31 downto 27) when 
+			  (ir(31 downto 30) = "01" and ir(29 downto 27) /= "100") or 	 	--AND, OR, ADD, SUB, IADD, SHL or SHR
+			  (ir(31 downto 30) = "00" and ((ir(29) xor ir(28))='1') and 
+			  				((ir(29) xor ir(28))='1')) 	else 	--NOT, INC or DEC
+			  "00000";
 
  	m <= 	"0101" when 	ir(31 downto 27) = "10000" or 		--PUSH
 				ir(31 downto 27) = "11010" 	else	--CALL
