@@ -22,7 +22,6 @@ use ieee.std_logic_1164.all;
 
 -- Output bits to others
 --	jump_cat,	(1 bit),	uncond_jump	(1 bit)
---	ir_hazard	(),		src_hazard	(2 bits)
 
 entity decode_stage is
 port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
@@ -31,9 +30,8 @@ port(	ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	clk, rst,intr,zero_flag,hazard_detected:	in std_logic;
 
 	ext,Rsrc2,Rsrc1:				out std_logic_vector(31 downto 0);
-	jump_cat,uncond_jump:			out std_logic;
-	src_hazard:					out std_logic_vector(1 downto 0);
-	Rsrc1_num,Rsrc2_num,Rdst_num:	out std_logic_vector(2 downto 0);
+	jump_cat,uncond_jump:				out std_logic;
+	Rsrc1_num,Rsrc2_num,Rdst_num:			out std_logic_vector(2 downto 0);
 	m:						out std_logic_vector(3 downto 0);
 	wb:						out std_logic_vector(4 downto 0);
 	ex:						out std_logic_vector(5 downto 0)
@@ -62,6 +60,7 @@ begin
 --		"010000" when	ir(31 downto 27) = "11000"	else	--JZ
 --		"000000";
 --
+----------------------------------- Decoding Circuit ----------------------------------------------
 	ex(5) <= 	  '1' when ir(31 downto 27) = "00100"				else	--IN
 			  '0';
 
@@ -102,7 +101,13 @@ begin
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		(others => '0');
 
+	jump_cat <=	'1' when ir(31 downto 30) = "11" else	--JZ - JMP - CALL - RET - RTI
+			'0';
 
+	uncond_jump <=	'0' when ir(29 downto 27) = "000" else	--JZ
+			'1';
+
+---------------------------------- Register File -----------------------------------------------------------
 	u0: entity work.Reg port map(clk,rst,en0,R0_in,R0);
 	u1: entity work.Reg port map(clk,rst,en1,R1_in,R1);
 	u2: entity work.Reg port map(clk,rst,en2,R2_in,R2);
@@ -198,6 +203,5 @@ begin
 	en7 <=		'1' when (dst1_num = "111" and dst1_en = '1') or
 				 (dst2_num = "111" and dst2_en = '1') else
 			'0';
-
 
 end decode;
