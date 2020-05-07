@@ -2,7 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 -- Input bits from IF/ID
---	IR 		(32 bits),	src1_exist 	(1 bit),	src2_exist 	(1 bit)
+--	ir 		(32 bits),	pc 		(32 bits)	
+--	src1_exist 	(1 bit),	src2_exist 	(1 bit)
 
 -- Input bits from M/WB
 --	dst1_num	(3 bits),	dst1_result	(32 bits),	dst1_Enable	(1 bit)
@@ -10,7 +11,7 @@ use ieee.std_logic_1164.all;
 
 
 -- Input bits from others
---	rst		(1 bit),	zero_flag	(1 bit),	
+--	rst		(1 bit),	flag_reg	(4 bit),	
 --	interrupt	(1 bit),	hazard_detected	(1 bit)
 
 -- Output bits to ID/IE
