@@ -168,6 +168,8 @@ def getOpcode(inst):
     ret = ret[0:5] + dst + src1 + src2 + ret[14:len(ret)]
     if len(ret)==32:
         ret = ret[0:12] + imd
+    else:
+        ret = ret + 16*'0'
     return ret
 
 
@@ -179,17 +181,14 @@ def fillMemory(lst):
             cur = int(r[2],16)-1
             continue
         
-        cur += 1
         if((r[1] in sz) and (len(r)==sz[r[1]]))==False:
-            ret.append([cur,"{0:016b}".format(int(r[1],16))])
-            continue
-        
-        op = getOpcode(r)
-        ret.append([cur,op[0:16]])
-        if len(op)==32:
-            cur += 1
-            ret.append([cur,op[16:32]])
-    
+            op = "{0:032b}".format(int(r[1],16))
+        else:
+            op = getOpcode(r)
+        ret.append([cur+1,op[0:16]])
+        ret.append([cur+2,op[16:32]])
+        cur += 2
+
     ret.sort()
     return ret
 
