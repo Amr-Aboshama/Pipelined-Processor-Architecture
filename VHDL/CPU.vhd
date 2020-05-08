@@ -1,22 +1,41 @@
-library ieee ;
-use ieee.std_logic_1164.all;
+library IEEE ;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
 
-entity cpu is
-	port(	clk,rst,intr: 	in std_logic
+entity CPU is
+	port(	CLK,RST,INT: 	in std_logic
 	    
 	);
-end cpu;
+end CPU;
 
-architecture cpu_arch of cpu is
-	signal FD_en,DE_en: std_logic;
-	signal FD_in,FD_out: std_logic_vector(65 downto 0);
-	signal DE_in,DE_out: std_logic_vector(151 downto 0);
+architecture CPU_ARCH of CPU is
+	signal DE_ENABLE: std_logic;
+	signal DE_IN, DE_OUT: std_logic_vector(151 downto 0);
+	
+	-----------> FETCH_STAGE <-------------
+	signal F_ENABLE, FD_ENABLE:	std_logic;
+	signal INST_CACHE_DATA:	unsigned(15 downto 0);
+	signal INST_CACHE_ADD:	unsigned(10 downto 0);
+	signal INST_CACHE_RD_DONE, INST_CACHE_RD_ENABLE:	std_logic;
+	signal INST2, INST1: unsigned(15 downto 0);
+	signal HAVE_SRC1, HAVE_SRC2:	std_logic;
+	signal CHANGE_PC:	std_logic;
+	signal PC, NEW_PC:	unsigned(31 downto 0);
+	signal FD_IN, FD_OUT: std_logic_vector(67 downto 0);
 begin
 	---------- PC(32 bits) + IR(32 bits) + src_exist(2 bits) ---------
-	FD: entity work.Reg generic map(66) port map(clk,rst,FD_en,FD_in,FD_out);
+
+	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, F_ENABLE, INT, FD_ENABLE, PC, 
+		INST_CACHE_DATA, INST_CACHE_ADD, INST_CACHE_RD_DONE, INST_CACHE_RD_ENABLE, 
+		INST1, INST2, HAVE_SRC1, HAVE_SRC2, CHANGE_PC, NEW_PC);
+	
+	FD_IN <= std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & "00");
+	
+
+	FD: entity work.Reg generic map(68) port map(CLK, RST, FD_ENABLE, FD_IN, FD_OUT);
 
 	------ PC(32 bits) + EXT(32 bits) + Rsrc1(32 bits) + Rsrc2(32 bits) + Rsrc1_num(3 bits) -------------------
 	------ + Rsrc2_num(3 bits) + Rdst_num(3 bits) + EX(6 bits) + M(4 bits) + WB(5 bits) --------------------------
-	DE: entity work.Reg generic map(152) port map(clk,rst,DE_en,DE_in,DE_out);
+	DE: entity work.Reg generic map(152) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
 
-end cpu_arch;
+end CPU_ARCH;

@@ -4,3 +4,8 @@
 - FETCH_STAGE have inputs "NEW_PC" and "CHANGE_PC" signal, to change PC with a specific value so the value of the PC should be chosen
     out of the FETCH_STAGE and just send it the update of the PC.
 
+
+- While INT=0 & RST=0 (i.e. normal fetching), Invert of "STALL" Signal of the FETCH_STAGE works as IF/ID Registers Enable
+    IF (STALL=0) => Write Values in IF/ID Registers
+
+- IF/ID Registers works with "CLK rising_edge"

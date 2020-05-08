@@ -11,7 +11,7 @@ entity FETCH_STAGE is
     );
     port (
         CLK, RST, ENABLE, INT:    IN  std_logic;
-        STALL:  OUT std_logic;
+        WRITE_REG:  OUT std_logic;
         PC_OUT: OUT unsigned(DATA_WIDTH-1 downto 0) ;
         MEM_DATA:   IN  unsigned(INST_WIDTH-1 downto 0);
         MEM_ADD:    OUT unsigned(ADDRESS_WIDTH-1 downto 0);
@@ -27,6 +27,7 @@ end FETCH_STAGE;
 architecture FETCH of FETCH_STAGE is
     signal PC: unsigned(DATA_WIDTH-1 downto 0) := (others=>'0');
     signal OPCODE: unsigned(4 downto 0) := (others=>'0');
+    signal STALL_REG: std_logic;
 begin
 
 
@@ -40,6 +41,7 @@ begin
                         or  (OPCODE(4 downto 2) = "110" and (NOT (OPCODE(1) and OPCODE(0))) ='1')
                         else '0';
 
+    WRITE_REG <= NOT STALL_REG;
 
     MAIN: process( CLK, RST, INT )
     
@@ -52,14 +54,14 @@ begin
             if(RST'event) then
                 counter := 0;
                 MEM_ADD <= to_unsigned(0,ADDRESS_WIDTH);
-            elsif(INT'event) then
-                counter := 0;
+            elsif(INT='1' and STALL_REG='0') then
+                -- counter := 0;
                 MEM_ADD <= to_unsigned(2,ADDRESS_WIDTH);
             end if;
 
             
-            if(RST='1' or INT='1') then
-                STALL <= '0';
+            if(RST='1' or (INT='1' and STALL_REG='0')) then
+                STALL_REG <= '1';
                 
                 INST1 <= (others=>'0');
                 INST2 <= (others=>'0');
@@ -94,7 +96,7 @@ begin
                 MEM_ADD <= PC(ADDRESS_WIDTH-1 downto 0);
                 
                 if(falling_edge(CLK) and MEM_RD_DONE='1') then
-                    STALL <= '1';
+                    STALL_REG <= '1';
                     if(counter=0)   then
                         counter := 1;
                         INST2 <= MEM_DATA;
@@ -102,7 +104,7 @@ begin
                     else
                         counter := 0;
                         INST1 <= MEM_DATA;
-                        STALL <= '0';
+                        STALL_REG <= '0';
                     end if;
 
                     MEM_RD_ENABLE <= '0';
