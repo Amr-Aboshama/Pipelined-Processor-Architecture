@@ -1,0 +1,6 @@
+- Every Instruction is 2 words (i.e. 32 bit).
+- Interrupt module deals with the FETCH_STAGE by getting the PC from it and push it to the stack itself,
+    then it raises INT signal in FETCH_STAGE. PC in FETCH_STAGE wil be loaded with {M[2],M[3]}.
+- FETCH_STAGE have inputs "NEW_PC" and "CHANGE_PC" signal, to change PC with a specific value so the value of the PC should be chosen
+    out of the FETCH_STAGE and just send it the update of the PC.
+
