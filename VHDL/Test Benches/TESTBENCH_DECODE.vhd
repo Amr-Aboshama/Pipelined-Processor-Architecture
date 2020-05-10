@@ -36,69 +36,178 @@ begin
 	--------- Test NOP ----------
 	ir <= (others => '0');
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="000000") 	report "NOP Failed for EX" 		severity error;
-	assert (m="0000") 	report "NOP Failed for MEM" 		severity error;	
-	assert (wb="00000") 	report "NOP Failed for WB" 		severity error;	
+	assert (ex="000000") 	report "NOP Failed for EX" 				severity error;
+	assert (m="0000") 	report "NOP Failed for MEM" 				severity error;	
+	assert (wb="00000") 	report "NOP Failed for WB" 				severity error;	
 
 	--------- Test NOT Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 27) <= "00001";
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="000001") 	report "NOT Rdst Failed for EX" 	severity error;
-	assert (m="0000") 	report "NOT Rdst Failed for MEM" 	severity error;	
-	assert (wb="00101") 	report "NOT Rdst Failed for WB" 	severity error;	
-	assert (Rdst_num="000") report "NOT Rdst Failed for Rdst_num" 	severity error;	
-	assert (Rsrc1_num="000")report "NOT Rdst Failed for Rsrc1_num" 	severity error;
+	assert (ex="000001") 	report "NOT Rdst Failed for EX" 			severity error;
+	assert (m="0000") 	report "NOT Rdst Failed for MEM" 			severity error;	
+	assert (wb="00101") 	report "NOT Rdst Failed for WB" 			severity error;	
+	assert (Rdst_num="000") report "NOT Rdst Failed for Rdst_num" 			severity error;	
+	assert (Rsrc1_num="000")report "NOT Rdst Failed for Rsrc1_num" 			severity error;
 
 	--------- Test INC Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 21) <= "00010001001";
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="000010") 	report "INC Rdst Failed for EX" 	severity error;
-	assert (m="0000") 	report "INC Rdst Failed for MEM" 	severity error;	
-	assert (wb="00101") 	report "INC Rdst Failed for WB" 	severity error;	
-	assert (Rdst_num="001") report "INC Rdst Failed for Rdst_num" 	severity error;	
-	assert (Rsrc1_num="001")report "INC Rdst Failed for Rsrc1_num" 	severity error;
+	assert (ex="000010") 	report "INC Rdst Failed for EX" 			severity error;
+	assert (m="0000") 	report "INC Rdst Failed for MEM" 			severity error;	
+	assert (wb="00101") 	report "INC Rdst Failed for WB" 			severity error;	
+	assert (Rdst_num="001") report "INC Rdst Failed for Rdst_num" 			severity error;	
+	assert (Rsrc1_num="001")report "INC Rdst Failed for Rsrc1_num" 			severity error;
 		
 	--------- Test DEC Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 21) <= "00011010010";
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="000011") 	report "DEC Rdst Failed for EX" 	severity error;
-	assert (m="0000") 	report "DEC Rdst Failed for MEM" 	severity error;	
-	assert (wb="00101") 	report "DEC Rdst Failed for WB" 	severity error;	
-	assert (Rdst_num="010") report "DEC Rdst Failed for Rdst_num" 	severity error;	
-	assert (Rsrc1_num="010")report "DEC Rdst Failed for Rsrc1_num" 	severity error;
+	assert (ex="000011") 	report "DEC Rdst Failed for EX" 			severity error;
+	assert (m="0000") 	report "DEC Rdst Failed for MEM" 			severity error;	
+	assert (wb="00101") 	report "DEC Rdst Failed for WB" 			severity error;	
+	assert (Rdst_num="010") report "DEC Rdst Failed for Rdst_num" 			severity error;	
+	assert (Rsrc1_num="010")report "DEC Rdst Failed for Rsrc1_num" 			severity error;
 
 	--------- Test OUT Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 21) <= "00100000011";
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="000000") 	report "OUT Rdst Failed for EX" 	severity error;
-	assert (m="0000") 	report "OUT Rdst Failed for MEM" 	severity error;	
-	assert (wb="00000") 	report "OUT Rdst Failed for WB" 	severity error;	
-	assert (Rsrc1_num="011")report "OUT Rdst Failed for Rsrc1_num" 	severity error;
+	assert (ex="000000") 	report "OUT Rdst Failed for EX" 			severity error;
+	assert (m="0000") 	report "OUT Rdst Failed for MEM" 			severity error;	
+	assert (wb="00000") 	report "OUT Rdst Failed for WB" 			severity error;	
+	assert (Rsrc1_num="011")report "OUT Rdst Failed for Rsrc1_num" 			severity error;
 
 	--------- Test IN Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 21) <= "00101100000";
 
-	wait for 100 ns;
+	wait for 2 ns;
 	
-	assert (ex="100000") 	report "IN Rdst Failed for EX" 		severity error;
-	assert (m="0000") 	report "IN Rdst Failed for MEM" 	severity error;	
-	assert (wb="00101") 	report "IN Rdst Failed for WB" 		severity error;	
-	assert (Rdst_num="100")report "IN Rdst Failed for Rdst_num" 	severity error;
+	assert (ex="100000") 	report "IN Rdst Failed for EX" 				severity error;
+	assert (m="0000") 	report "IN Rdst Failed for MEM" 			severity error;	
+	assert (wb="00101") 	report "IN Rdst Failed for WB" 				severity error;	
+	assert (Rdst_num="100")report "IN Rdst Failed for Rdst_num" 			severity error;
+
+	--------- Test AND Rsrc1,Rsrc2,Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 18) <= "01000101110111";
+
+	wait for 2 ns;
+	
+	assert (ex="001000") 	report "AND Rsrc1,Rsrc2,Rdst Failed for EX" 		severity error;
+	assert (m="0000") 	report "AND Rsrc1,Rsrc2,Rdst Failed for MEM" 		severity error;	
+	assert (wb="00101") 	report "AND Rsrc1,Rsrc2,Rdst Failed for WB" 		severity error;	
+	assert (Rsrc1_num="110")report "AND Rsrc1,Rsrc2,Rdst Failed for Rsrc1_num" 	severity error;
+	assert (Rsrc2_num="111")report "AND Rsrc1,Rsrc2,Rdst Failed for Rsrc2_num" 	severity error;
+	assert (Rdst_num="101")	report "AND Rsrc1,Rsrc2,Rdst Failed for Rdst_num" 	severity error;
+
+	--------- Test OR Rsrc1,Rsrc2,Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 18) <= "01001000110111";
+
+	wait for 2 ns;
+	
+	assert (ex="001001") 	report "OR Rsrc1,Rsrc2,Rdst Failed for EX" 		severity error;
+	assert (m="0000") 	report "OR Rsrc1,Rsrc2,Rdst Failed for MEM" 		severity error;	
+	assert (wb="00101") 	report "OR Rsrc1,Rsrc2,Rdst Failed for WB" 		severity error;	
+	assert (Rsrc1_num="110")report "OR Rsrc1,Rsrc2,Rdst Failed for Rsrc1_num" 	severity error;
+	assert (Rsrc2_num="111")report "OR Rsrc1,Rsrc2,Rdst Failed for Rsrc2_num" 	severity error;
+	assert (Rdst_num="000")	report "OR Rsrc1,Rsrc2,Rdst Failed for Rdst_num" 	severity error;
+
+	--------- Test ADD Rsrc1,Rsrc2,Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 18) <= "01010000110010";
+
+	wait for 2 ns;
+	
+	assert (ex="001010") 	report "ADD Rsrc1,Rsrc2,Rdst Failed for EX" 		severity error;
+	assert (m="0000") 	report "ADD Rsrc1,Rsrc2,Rdst Failed for MEM" 		severity error;	
+	assert (wb="00101") 	report "ADD Rsrc1,Rsrc2,Rdst Failed for WB" 		severity error;	
+	assert (Rsrc1_num="110")report "ADD Rsrc1,Rsrc2,Rdst Failed for Rsrc1_num" 	severity error;
+	assert (Rsrc2_num="010")report "ADD Rsrc1,Rsrc2,Rdst Failed for Rsrc2_num" 	severity error;
+	assert (Rdst_num="000")	report "ADD Rsrc1,Rsrc2,Rdst Failed for Rdst_num" 	severity error;
+
+	--------- Test SUB Rsrc1,Rsrc2,Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 18) <= "01011000001010";
+
+	wait for 2 ns;
+	
+	assert (ex="001011") 	report "SUB Rsrc1,Rsrc2,Rdst Failed for EX" 		severity error;
+	assert (m="0000") 	report "SUB Rsrc1,Rsrc2,Rdst Failed for MEM" 		severity error;	
+	assert (wb="00101") 	report "SUB Rsrc1,Rsrc2,Rdst Failed for WB" 		severity error;	
+	assert (Rsrc1_num="001")report "SUB Rsrc1,Rsrc2,Rdst Failed for Rsrc1_num" 	severity error;
+	assert (Rsrc2_num="010")report "SUB Rsrc1,Rsrc2,Rdst Failed for Rsrc2_num" 	severity error;
+	assert (Rdst_num="000")	report "SUB Rsrc1,Rsrc2,Rdst Failed for Rdst_num" 	severity error;
+
+	--------- Test SWAP Rsrc1,Rsrc2 ----------
+	ir <= (others => '0');
+	ir(31 downto 18) <= "01100000111000";
+
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "SWAP Rsrc1,Rsrc2 Failed for EX" 		severity error;
+	assert (m="0000") 	report "SWAP Rsrc1,Rsrc2 Failed for MEM" 		severity error;	
+	assert (wb="00111") 	report "SWAP Rsrc1,Rsrc2 Failed for WB" 		severity error;	
+	assert (Rsrc1_num="111")report "SWAP Rsrc1,Rsrc2 Failed for Rsrc1_num" 		severity error;
+	assert (Rsrc2_num="000")report "SWAP Rsrc1,Rsrc2 Failed for Rsrc2_num" 		severity error;
+
+	--------- Test IADD Rsrc1,Rdst,Imm ----------
+	ir(31 downto 16) <= "0110100011100000";
+	ir(15 downto 0) <= "1011010111110010";
+
+	wait for 2 ns;
+	
+	assert (ex="001101") 	report "IADD Rsrc1,Rdst,Imm Failed for EX" 		severity error;
+	assert (m="0000") 	report "IADD Rsrc1,Rdst,Imm Failed for MEM" 		severity error;	
+	assert (wb="00101") 	report "IADD Rsrc1,Rdst,Imm Failed for WB" 		severity error;	
+	assert (Rsrc1_num="111")report "IADD Rsrc1,Rdst,Imm Failed for Rsrc1_num" 	severity error;
+	assert (Rdst_num="000")	report "IADD Rsrc1,Rdst,Imm Failed for Rdst_num" 	severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(15 downto 0)), 32)))
+				report "IADD Rsrc1,Rdst,Imm Failed for EXT" 		severity error;
+
+	--------- Test SHL Rsrc,Imm ----------
+	ir(31 downto 16) <= "0111011111100000";
+	ir(15 downto 0) <= "0011010111110010";
+
+	wait for 2 ns;
+	
+	assert (ex="001110") 	report "SHL Rsrc,Imm Failed for EX" 				severity error;
+	assert (m="0000") 	report "SHL Rsrc,Imm Failed for MEM" 				severity error;	
+	assert (wb="00101") 	report "SHL Rsrc,Imm Failed for WB" 				severity error;	
+	assert (Rsrc1_num="111")report "SHL Rsrc,Imm Failed for Rsrc1_num" 			severity error;
+	assert (Rdst_num="111")	report "SHL Rsrc,Imm Failed for Rdst_num" 			severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(15 downto 0)), 32)))
+				report "SHL Rsrc,Imm Failed for EXT" 				severity error;
+
+	--------- Test SHR Rsrc,Imm ----------
+	ir(31 downto 16) <= "0111100100100000";
+	ir(15 downto 0) <= "1011010110010010";
+
+	wait for 2 ns;
+	
+	assert (ex="001111") 	report "SHR Rsrc,Imm Failed for EX" 				severity error;
+	assert (m="0000") 	report "SHR Rsrc,Imm Failed for MEM" 				severity error;	
+	assert (wb="00101") 	report "SHR Rsrc,Imm Failed for WB" 				severity error;	
+	assert (Rsrc1_num="001")report "SHR Rsrc,Imm Failed for Rsrc1_num" 			severity error;
+	assert (Rdst_num="001")	report "SHR Rsrc,Imm Failed for Rdst_num" 			severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(15 downto 0)), 32)))
+				report "SHR Rsrc,Imm Failed for EXT" 				severity error;
+
+
+
 		
 	wait;
 	end process;
