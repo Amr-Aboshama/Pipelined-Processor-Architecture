@@ -140,7 +140,9 @@ def getOpcode(inst):
         if code<4:
             src2 = getRegister(3)
             dst = getRegister(4)
-        elif code<6:
+        elif code==4:
+            src2 = getRegister(3)
+        elif code==5:
             dst = getRegister(3)
         else:
             dst=src1
