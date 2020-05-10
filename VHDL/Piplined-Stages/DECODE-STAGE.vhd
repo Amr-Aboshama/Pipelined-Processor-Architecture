@@ -74,8 +74,7 @@ begin
 	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "11000"			else	--JZ
 			  ir(31 downto 27) when 
 			  (ir(31 downto 30) = "01" and ir(29 downto 27) /= "100") or 	 	--AND - OR - ADD - SUB - IADD - SHL - SHR
-			  (ir(31 downto 30) = "00" and ((ir(29) xor ir(28))='1') and 
-			  				((ir(29) xor ir(28))='1')) 	else 	--NOT - INC - DEC
+			  (ir(31 downto 29) = "000" and ((ir(28) or ir(27))='1')) 	else 	--NOT - INC - DEC
 			  "00000";
 
  	m <= 	"0101" when 	ir(31 downto 27) = "10000" or 		--PUSH
