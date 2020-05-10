@@ -4,11 +4,10 @@ use ieee.numeric_std.all;
 
 -- Input bits from IF/ID
 --	ir 		(32 bits),	pc 		(32 bits)	
---	src1_exist 	(1 bit),	src2_exist 	(1 bit)
 
 -- Input bits from M/WB
---	dst1_num	(3 bits),	dst1_result	(32 bits),	dst1_Enable	(1 bit)
---	dst2_num	(3 bits),	dst2_result	(32 bits),	dst2_Enable	(1 bit)
+--	dst1_num	(3 bits),	dst1_result	(32 bits),	dst1_en		(1 bit)
+--	dst2_num	(3 bits),	dst2_result	(32 bits),	dst2_en		(1 bit)
 
 
 -- Input bits from others
