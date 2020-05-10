@@ -16,7 +16,7 @@ architecture CPU_ARCH of CPU is
 	signal F_ENABLE, FD_ENABLE:	std_logic;
 	signal INST_MEM_DATA:	std_logic_vector(15 downto 0);
 	signal INST_MEM_ADD:	unsigned(10 downto 0);
-	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE:	std_logic;
+	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
 	signal INST2, INST1: unsigned(15 downto 0);
 	signal HAVE_SRC1, HAVE_SRC2:	std_logic;
 	signal CHANGE_PC:	std_logic;
@@ -27,7 +27,7 @@ begin
 	--------------------------------------> Instruction Memory <-----------------------------------------------
 
 	INST_MEMORY: entity work.MEMORYMODULE generic map(16) port map(CLK, INST_MEM_RD_ENABLE, '0', (others=>'0'), 
-														std_logic_vector(INST_MEM_ADD), INST_MEM_RD_DONE, INST_MEM_DATA);
+														std_logic_vector(INST_MEM_ADD), INST_MEM_RD_DONE, TMP, INST_MEM_DATA);
 
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, F_ENABLE, INT, FD_ENABLE, PC, 
