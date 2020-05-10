@@ -7,7 +7,7 @@ use ieee.std_logic_1164.all;
 --	result		(32 bits),	Rdst2_num_in	(3 bit)
 --	wb		(5 bits)
 
--- Output bits to Decode_Stage
+-- Output bits to Register File in Decode_Stage
 --	Rdst1_result	(32 bits),	Rdst1_num	(3 bits),	Enable_Rdst1	(1 bit)
 --	Rdst2_result	(32 bits),	Rdst2_num	(3 bits),	Enable_Rdst2	(1 bit)
 
@@ -15,7 +15,7 @@ use ieee.std_logic_1164.all;
 --	mem_result 	(32 bits)
 
 -- Output bits to Forwarding_Unit
---	Rdst1_num_fr 	(3 bits)
+--	Rdst1_num_fr 	(3 bits),	Rdst2_num_fr 	(3 bits)
 
 entity write_back_stage is
 port(	mem_result_in,alu_result,result:		in std_logic_vector(31 downto 0);
@@ -24,11 +24,28 @@ port(	mem_result_in,alu_result,result:		in std_logic_vector(31 downto 0);
 
 	Rdst1_result,Rdst2_result,mem_result:		out std_logic_vector(31 downto 0);
 	Enable_Rdst1,Enable_Rdst2:			out std_logic;
-	Rdst1_num,Rdst2_num,Rdst1_num_fr:			out std_logic_vector(2 downto 0)
+	Rdst1_num,Rdst2_num,Rdst1_num_fr,Rdst2_num_fr:	out std_logic_vector(2 downto 0)
 );
 end write_back_stage;
 
 architecture write_back of write_back_stage is
 begin
+	-------- Output to Register File in Decode_Stage -----------
+	Rdst1_num 	<=	Rdst1_num_in;
+	Rdst2_num 	<=	Rdst2_num_in;
+	
+	Enable_Rdst1 	<=	wb(2);
+	Enable_Rdst2	<=	wb(1);
+	
+	Rdst1_result	<=	mem_result_in when wb(0)='0' else
+				alu_result;
+	Rdst2_result	<=	result;
 
+	----------------- Output to Fetch_Stage --------------------
+	mem_result	<=	mem_result_in;
+
+	--------------- Output to Forwarding_Unit ------------------
+	Rdst1_num_fr	<=	Rdst1_num_in;
+	Rdst2_num_fr	<=	Rdst2_num_in;
+	
 end architecture;
