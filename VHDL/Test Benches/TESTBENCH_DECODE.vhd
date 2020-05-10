@@ -33,6 +33,7 @@ begin
 	process	
     	begin								
 	
+	--------------------------------- One Operand ---------------------------------
 	--------- Test NOP ----------
 	ir <= (others => '0');
 
@@ -99,7 +100,8 @@ begin
 	assert (m="0000") 	report "IN Rdst Failed for MEM" 			severity error;	
 	assert (wb="00101") 	report "IN Rdst Failed for WB" 				severity error;	
 	assert (Rdst_num="100")report "IN Rdst Failed for Rdst_num" 			severity error;
-
+	
+	--------------------------------- Two Operands ---------------------------------
 	--------- Test AND Rsrc1,Rsrc2,Rdst ----------
 	ir <= (others => '0');
 	ir(31 downto 18) <= "01000101110111";
@@ -205,6 +207,69 @@ begin
 	assert (Rdst_num="001")	report "SHR Rsrc,Imm Failed for Rdst_num" 			severity error;
 	assert (ext = std_logic_vector(resize(signed(ir(15 downto 0)), 32)))
 				report "SHR Rsrc,Imm Failed for EXT" 				severity error;
+
+	--------------------------------- Memory Operations ---------------------------------
+	--------- Test PUSH Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "10000000001";
+	
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "PUSH Rdst Failed for EX" 				severity error;
+	assert (m="0101") 	report "PUSH Rdst Failed for MEM" 				severity error;	
+	assert (wb="00000") 	report "PUSH Rdst Failed for WB" 				severity error;	
+	assert (Rsrc1_num="001")report "PUSH Rdst Failed for Rsrc1_num" 			severity error;
+
+	--------- Test POP Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "10001000001";
+	
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "POP Rdst Failed for EX" 				severity error;
+	assert (m="1000") 	report "POP Rdst Failed for MEM" 				severity error;	
+	assert (wb="00100") 	report "POP Rdst Failed for WB" 				severity error;	
+	assert (Rsrc1_num="001")report "POP Rdst Failed for Rsrc1_num" 				severity error;
+
+	--------- Test STD Rsrc,EA ----------
+	ir(31 downto 20) <= "101010000010";
+	ir(19 downto 0)  <= "10100011001101011011";
+	
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "STD Rsrc,EA Failed for EX" 				severity error;
+	assert (m="0111") 	report "STD Rsrc,EA Failed for MEM" 				severity error;	
+	assert (wb="00000") 	report "STD Rsrc,EA Failed for WB" 				severity error;	
+	assert (Rsrc1_num="001")report "STD Rsrc,EA Failed for Rsrc1_num" 			severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(19 downto 0)), 32)))
+				report "STD Rsrc,EA Failed for EXT" 				severity error;
+
+	--------- Test LDD Rsrc,EA ----------
+	ir(31 downto 20) <= "101100000010";
+	ir(19 downto 0)  <= "10100011001101011011";
+	
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "LDD Rsrc,EA Failed for EX" 				severity error;
+	assert (m="1011") 	report "LDD Rsrc,EA Failed for MEM" 				severity error;	
+	assert (wb="00100") 	report "LDD Rsrc,EA Failed for WB" 				severity error;	
+	assert (Rdst_num="000")report "LDD Rsrc,EA Failed for Rsrc1_num" 			severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(19 downto 0)), 32)))
+				report "LDD Rsrc,EA Failed for EXT" 				severity error;
+
+	--------- Test LDM Rdst,Imm ----------
+	ir(31 downto 16) <= "1011100100100000";
+	ir(15 downto 0)  <= "1010001101011011";
+	
+	wait for 2 ns;
+	
+	assert (ex="000000") 	report "LDM Rdst,Imm Failed for EX" 				severity error;
+	assert (m="0011") 	report "LDM Rdst,Imm Failed for MEM" 				severity error;	
+	assert (wb="00001") 	report "LDM Rdst,Imm Failed for WB" 				severity error;	
+	assert (Rdst_num="001")report "LDM Rdst,Imm Failed for Rsrc1_num" 			severity error;
+	assert (ext = std_logic_vector(resize(signed(ir(15 downto 0)), 32)))
+				report "LDM Rdst,Imm Failed for EXT" 				severity error;
+
 
 
 
