@@ -28,7 +28,7 @@ use ieee.numeric_std.all;
 entity decode_stage is
 port(	ir,pc,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	dst1_num,dst2_num:				in std_logic_vector(2 downto 0);
-	dst1_en,dst2_en:	in std_logic;
+	dst1_en,dst2_en:				in std_logic;
 	clk, rst,hazard_detected:			in std_logic;
 	intr:						in std_logic_vector(1 downto 0);
 	flag_reg:					in std_logic_vector(3 downto 0);
