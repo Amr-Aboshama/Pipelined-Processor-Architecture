@@ -33,9 +33,9 @@ begin
 
     PC_OUT <= PC;
     
-    WRITE_REG <= NOT STALL_REG;
-    
-    MEM_RD_ENABLE <= '0' when MEM_RD_DONE='1'
+    WRITE_REG <= (NOT STALL_REG) and (NOT CHANGE_PC);
+
+    MEM_RD_ENABLE <= '0' when MEM_RD_DONE='1' or CHANGE_PC = '1'
                     else '1';
 
     HAVE_SRC2 <= '1' when   OPCODE(4 downto 2) = "010"
