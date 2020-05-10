@@ -32,6 +32,12 @@ begin
 
 
     PC_OUT <= PC;
+    
+    WRITE_REG <= (NOT STALL_REG) and (NOT CHANGE_PC);
+
+    MEM_RD_ENABLE <= '0' when MEM_RD_DONE='1' or CHANGE_PC = '1'
+                    else '1';
+
     HAVE_SRC2 <= '1' when   OPCODE(4 downto 2) = "010"
                         else '0';
                         
@@ -41,7 +47,6 @@ begin
                         or  (OPCODE(4 downto 2) = "110" and (NOT (OPCODE(1) and OPCODE(0))) ='1')
                         else '0';
 
-    WRITE_REG <= NOT STALL_REG;
 
     MAIN: process( CLK, RST, INT )
     
@@ -66,28 +71,37 @@ begin
                 INST1 <= (others=>'0');
                 INST2 <= (others=>'0');
                 OPCODE <= (others=>'0');
-                MEM_RD_ENABLE <= '1';
+
+                -- if(MEM_RD_DONE='1') then MEM_RD_ENABLE <= '0';
+                -- else    MEM_RD_ENABLE <= '1'    end if;
                 
                 if(falling_edge(CLK) and MEM_RD_DONE='1') then
-                    if(counter=0)   then
-                        counter := 1;
+                    if(counter=1)   then
+                        -- counter := 1;
                         PC(DATA_WIDTH-1 downto 16) <= MEM_DATA;
                         
                         if(RST='1') then    MEM_ADD <= to_unsigned(1,ADDRESS_WIDTH);
                         elsif(INT='1') then   MEM_ADD <= to_unsigned(3,ADDRESS_WIDTH);
                         end if;
 
-                    else
-                        counter := 0;
+                    -- elsif (counter=1) then      -- Because MEM_RD_DONE is high for two cycles
+                    --     counter := 2;
+
+                    elsif (counter=3)   then
+                        -- counter := 3;
                         PC(15 downto 0) <= MEM_DATA;
 
                     end if;
 
-                    MEM_RD_ENABLE <= '0';
+                    counter := counter + 1;
+                    -- MEM_RD_ENABLE <= '0';
                 end if;
             
             else
-                MEM_RD_ENABLE <= '1';
+                -- MEM_RD_ENABLE <= '1';
+
+                -- if(MEM_RD_DONE='1') then MEM_RD_ENABLE <= '0';
+                -- else    MEM_RD_ENABLE <= '1'    end if;
 
                 --TODO: Logic of PC here
 
@@ -97,22 +111,27 @@ begin
                 
                 if(falling_edge(CLK) and MEM_RD_DONE='1') then
                     STALL_REG <= '1';
-                    if(counter=0)   then
-                        counter := 1;
+                    if(counter=1)   then
+                        -- counter := 1;
                         INST2 <= MEM_DATA;
                         OPCODE <= MEM_DATA(INST_WIDTH-1 downto INST_WIDTH-5);
-                    else
-                        counter := 0;
+                        PC <= PC + to_unsigned(1,DATA_WIDTH);
+                    
+                    elsif(counter=3)    then
+                        counter := -1;
                         INST1 <= MEM_DATA;
                         STALL_REG <= '0';
+                        PC <= PC + to_unsigned(1,DATA_WIDTH);
                     end if;
-
-                    MEM_RD_ENABLE <= '0';
                     
-                    PC <= PC + to_unsigned(1,DATA_WIDTH);
+                    -- MEM_RD_ENABLE <= '0';
+                    counter := counter + 1;
                 end if;
                 
-                if(CHANGE_PC='1') then  PC <= NEW_PC;   end if;
+                if(CHANGE_PC='1') then  
+                    PC <= NEW_PC;   
+                    counter:=0;   
+                end if;
 
             end if;
                 

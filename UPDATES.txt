@@ -9,3 +9,7 @@
     IF (STALL=0) => Write Values in IF/ID Registers
 
 - IF/ID Registers works with "CLK rising_edge"
+
+- While Changing PC, "CHANGE_PC" should be high for two cycles.
+- Reset is Done in "14" cycles.
+- MEMORY Read Done is high for 2 cycles
