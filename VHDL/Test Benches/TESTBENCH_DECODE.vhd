@@ -53,6 +53,52 @@ begin
 	assert (wb="00101") 	report "NOT Rdst Failed for WB" 	severity error;	
 	assert (Rdst_num="000") report "NOT Rdst Failed for Rdst_num" 	severity error;	
 	assert (Rsrc1_num="000")report "NOT Rdst Failed for Rsrc1_num" 	severity error;
+
+	--------- Test INC Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "00010001001";
+
+	wait for 100 ns;
+	
+	assert (ex="000010") 	report "INC Rdst Failed for EX" 	severity error;
+	assert (m="0000") 	report "INC Rdst Failed for MEM" 	severity error;	
+	assert (wb="00101") 	report "INC Rdst Failed for WB" 	severity error;	
+	assert (Rdst_num="001") report "INC Rdst Failed for Rdst_num" 	severity error;	
+	assert (Rsrc1_num="001")report "INC Rdst Failed for Rsrc1_num" 	severity error;
+		
+	--------- Test DEC Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "00011010010";
+
+	wait for 100 ns;
+	
+	assert (ex="000011") 	report "DEC Rdst Failed for EX" 	severity error;
+	assert (m="0000") 	report "DEC Rdst Failed for MEM" 	severity error;	
+	assert (wb="00101") 	report "DEC Rdst Failed for WB" 	severity error;	
+	assert (Rdst_num="010") report "DEC Rdst Failed for Rdst_num" 	severity error;	
+	assert (Rsrc1_num="010")report "DEC Rdst Failed for Rsrc1_num" 	severity error;
+
+	--------- Test OUT Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "00100000011";
+
+	wait for 100 ns;
+	
+	assert (ex="000000") 	report "OUT Rdst Failed for EX" 	severity error;
+	assert (m="0000") 	report "OUT Rdst Failed for MEM" 	severity error;	
+	assert (wb="00000") 	report "OUT Rdst Failed for WB" 	severity error;	
+	assert (Rsrc1_num="011")report "OUT Rdst Failed for Rsrc1_num" 	severity error;
+
+	--------- Test IN Rdst ----------
+	ir <= (others => '0');
+	ir(31 downto 21) <= "00101100000";
+
+	wait for 100 ns;
+	
+	assert (ex="100000") 	report "IN Rdst Failed for EX" 		severity error;
+	assert (m="0000") 	report "IN Rdst Failed for MEM" 	severity error;	
+	assert (wb="00101") 	report "IN Rdst Failed for WB" 		severity error;	
+	assert (Rdst_num="100")report "IN Rdst Failed for Rdst_num" 	severity error;
 		
 	wait;
 	end process;

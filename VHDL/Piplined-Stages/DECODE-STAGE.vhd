@@ -68,7 +68,7 @@ begin
 --		"000000";
 --
 ----------------------------------- Decoding Circuit ----------------------------------------------
-	ex(5) <= 	  '1' when ir(31 downto 27) = "00100"				else	--IN
+	ex(5) <= 	  '1' when ir(31 downto 27) = "00101"				else	--IN
 			  '0';
 
 	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "11000"			else	--JZ
