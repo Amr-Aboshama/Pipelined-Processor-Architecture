@@ -101,7 +101,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
               	      END IF; -- END IF COUNTERREAD0
                       
                       
-                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' AND DIRTYTRIGGER1 = '1') THEN -- NOT DIRTY
+                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' OR DIRTYTRIGGER1 = '1') THEN -- NOT DIRTY
                     	IF ( COUNTERREAD1 = 0) THEN -- WRITE TO CACHE (MEMORY TO CACHE)
                           MEMREAD <= '1';
                           ADDRESSOUT <= ADDRESSBUFFER(10 DOWNTO 3) & "000";
