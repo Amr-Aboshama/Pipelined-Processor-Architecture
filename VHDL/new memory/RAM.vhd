@@ -37,7 +37,7 @@ ARCHITECTURE RAMARCH OF RAM IS
     PROCESS (CLK) IS
     
     	BEGIN        
-    	IF (FALLING_EDGE(CLK)) THEN
+    	IF (RISING_EDGE(CLK)) THEN
         
         	READYSIGNAL <= '0';
        		DONEWRITING <= '0';
