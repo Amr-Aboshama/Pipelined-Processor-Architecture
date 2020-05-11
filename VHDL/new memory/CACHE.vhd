@@ -65,6 +65,8 @@ ARCHITECTURE CACHEARCH OF CACHE IS
         ELSIF (MEMORYWRITE = '1') THEN 
             MEMORYOUT <= CACHEDATA(TO_INTEGER(UNSIGNED(INDEX)));
             DONEMEMORYWRITE <= '1';
+        ELSE
+            DATAOUT <= (OTHERS=>'Z');
           
         END IF; -- IF COND. ON INPUT SIGNALS 
         
