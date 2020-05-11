@@ -3,159 +3,141 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity FETCH_STAGE is
-    generic(
-        INST_WIDTH: integer := 16;
-        DATA_WIDTH: integer := 32;
-        ADDRESS_WIDTH:  integer := 11
+ENTITY FETCH_STAGE IS
+    GENERIC(
+        INST_WIDTH: INTEGER := 16;
+        DATA_WIDTH: INTEGER := 32;
+        ADDRESS_WIDTH:  INTEGER := 11
     );
-    port (
-        CLK, RST, ENABLE, INT:    IN  std_logic;
-        WRITE_REG:  OUT std_logic;
-        PC_OUT: OUT unsigned(DATA_WIDTH-1 downto 0) ;
-        MEM_DATA:   IN  unsigned(INST_WIDTH-1 downto 0);
-        MEM_ADD:    OUT unsigned(ADDRESS_WIDTH-1 downto 0);
-        MEM_RD_DONE:     IN  std_logic;
-        MEM_RD_ENABLE:    OUT  std_logic;
-        INST1, INST2:  OUT unsigned(INST_WIDTH-1 downto 0);
-        HAVE_SRC1, HAVE_SRC2: OUT std_logic;
-        CHANGE_PC:  IN std_logic;
-        NEW_PC: IN unsigned(DATA_WIDTH-1 downto 0)
+    PORT (
+        CLK, RST, ENABLE, INT:    IN  STD_LOGIC;
+        WRITE_REG:  OUT STD_LOGIC;
+        PC_OUT: OUT UNSIGNED(DATA_WIDTH-1 DOWNTO 0) ;
+        MEM_DATA:   IN  UNSIGNED(INST_WIDTH-1 DOWNTO 0);
+        MEM_ADD:    OUT UNSIGNED(ADDRESS_WIDTH-1 DOWNTO 0);
+        MEM_RD_DONE:     IN  STD_LOGIC;
+        MEM_RD_ENABLE:    OUT  STD_LOGIC;
+        INST1, INST2:  OUT UNSIGNED(INST_WIDTH-1 DOWNTO 0);
+        HAVE_SRC1, HAVE_SRC2: OUT STD_LOGIC;
+        CHANGE_PC:  IN STD_LOGIC;
+        NEW_PC: IN UNSIGNED(DATA_WIDTH-1 DOWNTO 0)
     );
-end FETCH_STAGE;
+END FETCH_STAGE;
 
-architecture FETCH of FETCH_STAGE is
-    signal PC: unsigned(DATA_WIDTH-1 downto 0) := (others=>'0');
-    signal OPCODE: unsigned(4 downto 0) := (others=>'0');
-    signal STALL_REG: std_logic;
-begin
+ARCHITECTURE FETCH OF FETCH_STAGE IS
+    SIGNAL PC: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
+    SIGNAL OPCODE: UNSIGNED(4 DOWNTO 0) := (OTHERS=>'0');
+    SIGNAL STALL_REG: STD_LOGIC;
+BEGIN
 
 
     PC_OUT <= PC;
     
-    WRITE_REG <= (NOT STALL_REG);-- and (NOT CHANGE_PC);
+    WRITE_REG <= NOT STALL_REG;
 
-    MEM_RD_ENABLE <= '0' when MEM_RD_DONE='1' or CHANGE_PC = '1'
-                    else '1';
+    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR CHANGE_PC = '1'
+                    ELSE '1';
 
-    HAVE_SRC2 <= '1' when   OPCODE(4 downto 2) = "010"
-                        else '0';
+    HAVE_SRC2 <= '1' WHEN   OPCODE(4 DOWNTO 2) = "010"
+                        ELSE '0';
                         
-    HAVE_SRC1 <= '1' when   (OPCODE(4 downto 3) = "00" and ( OPCODE(1) or (OPCODE(2) xor OPCODE(0)) ) = '1')   -- B | (A^C)
-                        or  OPCODE(4 downto 3) = "01"
-                        or  (OPCODE(4 downto 3) = "10" and ( (NOT OPCODE(1)) and (OPCODE(2) or (NOT OPCODE(0))) ) = '1')   -- !B & (A|!C) 
-                        or  (OPCODE(4 downto 2) = "110" and (NOT (OPCODE(1) and OPCODE(0))) ='1')
-                        else '0';
+    HAVE_SRC1 <= '1' WHEN   (OPCODE(4 DOWNTO 3) = "00" AND ( OPCODE(1) OR (OPCODE(2) XOR OPCODE(0)) ) = '1')   -- B | (A^C)
+                        OR  OPCODE(4 DOWNTO 3) = "01"
+                        OR  (OPCODE(4 DOWNTO 3) = "10" AND ( (NOT OPCODE(1)) AND (OPCODE(2) OR (NOT OPCODE(0))) ) = '1')   -- !B & (A|!C) 
+                        OR  (OPCODE(4 DOWNTO 2) = "110" AND (NOT (OPCODE(1) AND OPCODE(0))) ='1')
+                        ELSE '0';
 
 
-    MAIN: process( CLK, RST, INT )
+    MAIN: PROCESS( CLK, RST, INT )
     
-        variable counter: integer;
-        variable change_pc_latch: std_logic := '0';
-        variable new_pc_reg: unsigned(DATA_WIDTH-1 downto 0) := (others=>'0');
+        VARIABLE COUNTER: INTEGER;
+        VARIABLE CHANGE_PC_LATCH: STD_LOGIC := '0';
+        VARIABLE NEW_PC_REG: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
 
-    begin
-        if(ENABLE='1')  then
+    BEGIN
+        IF(ENABLE='1')  THEN
             
 
-            if(RST'event)   then
-                counter := 0;
-            end if;
+            IF(RST'EVENT)   THEN
+                COUNTER := 0;
+            END IF;
 
-            if(RST'event and RST='1') then
-                MEM_ADD <= to_unsigned(0,ADDRESS_WIDTH);
-            elsif(INT='1' and STALL_REG='0') then
-                -- counter := 0;
-                MEM_ADD <= to_unsigned(2,ADDRESS_WIDTH);
-            end if;
+            IF(RST'EVENT AND RST='1') THEN
+                MEM_ADD <= TO_UNSIGNED(0,ADDRESS_WIDTH);
+            ELSIF(INT='1' AND STALL_REG='0') THEN
+                MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
+            END IF;
 
             
-            if(RST='1' or (INT='1' and STALL_REG='0')) then
+            IF(RST='1' OR (INT='1' AND STALL_REG='0')) THEN
                 STALL_REG <= '1';
                 
-                INST1 <= (others=>'0');
-                INST2 <= (others=>'0');
-                OPCODE <= (others=>'0');
+                INST1 <= (OTHERS=>'0');
+                INST2 <= (OTHERS=>'0');
+                OPCODE <= (OTHERS=>'0');
 
-                -- if(MEM_RD_DONE='1') then MEM_RD_ENABLE <= '0';
-                -- else    MEM_RD_ENABLE <= '1'    end if;
                 
-                if(falling_edge(CLK) and MEM_RD_DONE='1') then
-                    if(counter=0)   then
-                        counter := 1;
-                        PC(DATA_WIDTH-1 downto 16) <= MEM_DATA;
+                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
+                    IF(COUNTER=0)   THEN
+                        COUNTER := 1;
+                        PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
                         
-                        if(RST='1') then    MEM_ADD <= to_unsigned(1,ADDRESS_WIDTH);
-                        elsif(INT='1') then   MEM_ADD <= to_unsigned(3,ADDRESS_WIDTH);
-                        end if;
+                        IF(RST='1') THEN    MEM_ADD <= TO_UNSIGNED(1,ADDRESS_WIDTH);
+                        ELSIF(INT='1') THEN   MEM_ADD <= TO_UNSIGNED(3,ADDRESS_WIDTH);
+                        END IF;
 
-                    -- elsif (counter=1) then      -- Because MEM_RD_DONE is high for two cycles
-                    --     counter := 2;
+                    ELSIF (COUNTER=1)   THEN
+                        COUNTER := 2;
+                        PC(15 DOWNTO 0) <= MEM_DATA;
+                        MEM_ADD <= MEM_DATA(ADDRESS_WIDTH-1 DOWNTO 0);
 
-                    elsif (counter=1)   then
-                        counter := 2;
-                        PC(15 downto 0) <= MEM_DATA;
-                        MEM_ADD <= MEM_DATA(ADDRESS_WIDTH-1 downto 0);
+                    END IF;
 
-                    end if;
-
-                    -- counter := counter + 1;
-                    -- MEM_RD_ENABLE <= '0';
-                end if;
+                END IF;
             
-            else
-                -- MEM_RD_ENABLE <= '1';
+            ELSE
 
-                -- if(MEM_RD_DONE='1') then MEM_RD_ENABLE <= '0';
-                -- else    MEM_RD_ENABLE <= '1'    end if;
-
-                --TODO: Logic of PC here
+                --TODO: LOGIC OF PC HERE
 
 
+                MEM_ADD <= PC(ADDRESS_WIDTH-1 DOWNTO 0); 
 
-                -- if(rising_edge(CLK))  then    
-                    MEM_ADD <= PC(ADDRESS_WIDTH-1 downto 0); 
-                -- end if;
-
-                if(falling_edge(CLK) and MEM_RD_DONE='1') then
-                    -- MEM_ADD <= PC(ADDRESS_WIDTH-1 downto 0);
+                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
                     STALL_REG <= '1';
-                    if(counter=0)   then
-                        counter := 1;
+                    IF(COUNTER=0)   THEN
+                        COUNTER := 1;
                         INST2 <= MEM_DATA;
-                        OPCODE <= MEM_DATA(INST_WIDTH-1 downto INST_WIDTH-5);
-                        PC <= PC + to_unsigned(1,DATA_WIDTH);
+                        OPCODE <= MEM_DATA(INST_WIDTH-1 DOWNTO INST_WIDTH-5);
+                        PC <= PC + TO_UNSIGNED(1,DATA_WIDTH);
                     
-                    elsif(counter=1)    then
-                        counter := 0;
+                    ELSIF(COUNTER=1)    THEN
+                        COUNTER := 0;
                         INST1 <= MEM_DATA;
                         STALL_REG <= '0';
-                        if(change_pc_latch='1') then  
-                            PC <= new_pc_reg;
-                            change_pc_latch := '0';
-                            counter:=0;
-                        else
-                            PC <= PC + to_unsigned(1,DATA_WIDTH);
-                        end if;
-                    end if;
+                        IF(CHANGE_PC_LATCH='1') THEN  
+                            PC <= NEW_PC_REG;
+                            CHANGE_PC_LATCH := '0';
+                            COUNTER:=0;
+                        ELSE
+                            PC <= PC + TO_UNSIGNED(1,DATA_WIDTH);
+                        END IF;
+                    END IF;
                     
-                    -- MEM_RD_ENABLE <= '0';
-                    -- counter := counter + 1;
-                end if;                
+                END IF;                
 
-                if(CHANGE_PC='1')   then
-                    change_pc_latch := '1';
-                    new_pc_reg := NEW_PC;
-                end if;
+                IF(CHANGE_PC='1')   THEN
+                    CHANGE_PC_LATCH := '1';
+                    NEW_PC_REG := NEW_PC;
+                END IF;
 
-            end if;
+            END IF;
                 
 
-        end if;
+        END IF;
 
-    end process ;
+    END PROCESS ;
 
     
 
 
-end FETCH ; -- FETCH
+END FETCH ; -- FETCH

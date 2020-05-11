@@ -17,6 +17,7 @@ force -freeze sim:/cpu/CLK 1 0, 0 {50 ps} -r 100
 force sim:/cpu/RST 1
 force sim:/cpu/INT 0
 force sim:/cpu/CHANGE_PC 0
+force sim:/cpu/NEW_PC 0
 force sim:/cpu/F_ENABLE 1
 force sim:/cpu/DE_ENABLE 0
 force sim:/cpu/DE_IN 0
@@ -27,11 +28,11 @@ for {set i 0} {$i < 100} {incr i} {
 
 #mem load -filltype value -filldata 1 -fillradix unsigned /cpu/INST_MEMORY/RAM_U/MEMORY(1)
 
-run 1400
+run 900
 force RST 0
 run 1700
 force CHANGE_PC 1
 force NEW_PC 0
-run 200
+run 
 force CHANGE_PC 0
-run 4000
+run 7000
