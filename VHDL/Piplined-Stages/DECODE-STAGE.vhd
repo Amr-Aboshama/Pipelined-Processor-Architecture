@@ -26,7 +26,7 @@ use ieee.numeric_std.all;
 
 entity decode_stage is
 port(	clk, rst:					in std_logic;
-	ir,pc,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
+	pc,ir,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	dst1_num,dst2_num:				in std_logic_vector(2 downto 0);
 	dst1_en,dst2_en:				in std_logic;
 	hazard_detected:				in std_logic;
@@ -57,7 +57,7 @@ begin
 
 	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "00100"			else	--OUT
 			  "00100" when ir(31 downto 27) = "01100" or 				--SWAP
-			  ir(31 downto 27) = "10000" or ir(31 downto 27) = "10001"	else	--PUSH - POP
+			  ir(31 downto 27) = "10000" or ir(31 downto 27) = "10101"	else	--PUSH - STD
 			  ir(31 downto 27) when 
 			  (ir(31 downto 30) = "01" and ir(29 downto 27) /= "100") or 	 	--AND - OR - ADD - SUB - IADD - SHL - SHR
 			  (ir(31 downto 29) = "000" and ((ir(28) or ir(27))='1')) 	else 	--NOT - INC - DEC

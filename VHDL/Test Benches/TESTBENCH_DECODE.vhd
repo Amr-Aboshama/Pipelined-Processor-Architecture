@@ -18,7 +18,7 @@ architecture decode_testbench of testbench_decode is
 	--constant half_clk_period : integer := 50;
 
 begin
-	u0: entity work.decode_stage port map(clk, rst,ir,pc,dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,flag_reg,ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m,wb,ex);
+	u0: entity work.decode_stage port map(clk, rst,pc,ir,dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,flag_reg,ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m,wb,ex);
 
 	--------------- process for the clock signal ---------------------
     	process
@@ -257,7 +257,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000100") 	report "POP Rdst Failed for EX" 				severity error;
+	assert (ex="000000") 	report "POP Rdst Failed for EX" 				severity error;
 	assert (m="1000") 	report "POP Rdst Failed for MEM" 				severity error;	
 	assert (wb="00100") 	report "POP Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "POP Rdst Failed for Rsrc1_num" 				severity error;
@@ -270,7 +270,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "STD Rsrc,EA Failed for EX" 				severity error;
+	assert (ex="000100") 	report "STD Rsrc,EA Failed for EX" 				severity error;
 	assert (m="0111") 	report "STD Rsrc,EA Failed for MEM" 				severity error;	
 	assert (wb="00000") 	report "STD Rsrc,EA Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "STD Rsrc,EA Failed for Rsrc1_num" 			severity error;
