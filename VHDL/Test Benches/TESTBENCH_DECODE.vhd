@@ -7,18 +7,18 @@ end testbench_decode;
 
 architecture decode_testbench of testbench_decode is
 
-	signal dst1_en,dst2_en,jump_cat,uncond_jump,clk, rst,hazard_detected:	std_logic;
-	signal intr:								std_logic_vector(1 downto 0);
-	signal dst1_num,dst2_num,Rsrc1_num,Rsrc2_num,Rdst_num:			std_logic_vector(2 downto 0);
-	signal flag_reg,m:							std_logic_vector(3 downto 0);
-	signal wb:								std_logic_vector(4 downto 0);
-	signal ex:								std_logic_vector(5 downto 0);
-	signal ir,pc,dst1_result,dst2_result,ext,Rsrc2,Rsrc1:			std_logic_vector(31 downto 0);
+	signal dst1_en,dst2_en,jump_cat,uncond_jump,clk, rst,hazard_detected,jz:	std_logic;
+	signal intr:									std_logic_vector(1 downto 0);
+	signal dst1_num,dst2_num,Rsrc1_num,Rsrc2_num,Rdst_num:				std_logic_vector(2 downto 0);
+	signal flag_reg,m:								std_logic_vector(3 downto 0);
+	signal wb:									std_logic_vector(4 downto 0);
+	signal ex:									std_logic_vector(5 downto 0);
+	signal ir,pc,dst1_result,dst2_result,ext,Rsrc2,Rsrc1:				std_logic_vector(31 downto 0);
 
 	--constant half_clk_period : integer := 50;
 
 begin
-	u0: entity work.decode_stage port map(ir,pc,dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,clk, rst,hazard_detected,intr,flag_reg,ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,Rsrc1_num,Rsrc2_num,Rdst_num,m,wb,ex);
+	u0: entity work.decode_stage port map(clk, rst,ir,pc,dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,flag_reg,ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m,wb,ex);
 
 	--------------- process for the clock signal ---------------------
     	process
@@ -93,7 +93,7 @@ begin
 
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "OUT Rdst Failed for EX" 				severity error;
+	assert (ex="010000") 	report "OUT Rdst Failed for EX" 				severity error;
 	assert (m="0000") 	report "OUT Rdst Failed for MEM" 				severity error;	
 	assert (wb="00000") 	report "OUT Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="011")report "OUT Rdst Failed for Rsrc1_num" 				severity error;
@@ -180,7 +180,7 @@ begin
 
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "SWAP Rsrc1,Rsrc2 Failed for EX" 			severity error;
+	assert (ex="000100") 	report "SWAP Rsrc1,Rsrc2 Failed for EX" 			severity error;
 	assert (m="0000") 	report "SWAP Rsrc1,Rsrc2 Failed for MEM" 			severity error;	
 	assert (wb="00111") 	report "SWAP Rsrc1,Rsrc2 Failed for WB" 			severity error;	
 	assert (Rsrc1_num="111")report "SWAP Rsrc1,Rsrc2 Failed for Rsrc1_num" 			severity error;
@@ -244,7 +244,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "PUSH Rdst Failed for EX" 				severity error;
+	assert (ex="000100") 	report "PUSH Rdst Failed for EX" 				severity error;
 	assert (m="0101") 	report "PUSH Rdst Failed for MEM" 				severity error;	
 	assert (wb="00000") 	report "PUSH Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "PUSH Rdst Failed for Rsrc1_num" 			severity error;
@@ -257,7 +257,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "POP Rdst Failed for EX" 				severity error;
+	assert (ex="000100") 	report "POP Rdst Failed for EX" 				severity error;
 	assert (m="1000") 	report "POP Rdst Failed for MEM" 				severity error;	
 	assert (wb="00100") 	report "POP Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "POP Rdst Failed for Rsrc1_num" 				severity error;
@@ -316,7 +316,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="010000") 	report "JZ Rdst Failed for EX" 					severity error;
+	assert (ex="000000") 	report "JZ Rdst Failed for EX" 					severity error;
 	assert (m="0000") 	report "JZ Rdst Failed for MEM" 				severity error;	
 	assert (wb="01000") 	report "JZ Rdst Failed for WB" 					severity error;	
 	assert (Rsrc1_num="001")report "JZ Rdst Failed for Rsrc1_num" 				severity error;

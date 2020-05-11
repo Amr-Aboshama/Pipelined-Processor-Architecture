@@ -25,15 +25,16 @@ use ieee.numeric_std.all;
 --	jump_cat,	(1 bit),	uncond_jump	(1 bit)
 
 entity decode_stage is
-port(	ir,pc,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
+port(	clk, rst:					in std_logic;
+	ir,pc,dst1_result,dst2_result:			in std_logic_vector(31 downto 0);
 	dst1_num,dst2_num:				in std_logic_vector(2 downto 0);
 	dst1_en,dst2_en:				in std_logic;
-	clk, rst,hazard_detected:			in std_logic;
+	hazard_detected:				in std_logic;
 	intr:						in std_logic_vector(1 downto 0);
 	flag_reg:					in std_logic_vector(3 downto 0);
 
 	ext,Rsrc2,Rsrc1:				out std_logic_vector(31 downto 0);
-	jump_cat,uncond_jump:				out std_logic;
+	jump_cat,uncond_jump,jz:			out std_logic;
 	Rsrc1_num,Rsrc2_num,Rdst_num:			out std_logic_vector(2 downto 0);
 	m:						out std_logic_vector(3 downto 0);
 	wb:						out std_logic_vector(4 downto 0);
@@ -50,27 +51,13 @@ architecture decode of decode_stage is
 	constant ZERO : std_logic_vector(31 downto 0) := (others => '0');
 begin
 
---    	ex <= 	"100000" when 	ir(31 downto 27) = "00100"	else	--IN
---		"000001" when 	ir(31 downto 27) = "00001"	else	--NOT
---		"000010" when 	ir(31 downto 27) = "00010"	else	--INC
---		"000011" when	ir(31 downto 27) = "00011"	else	--DEC
---
---		"001000" when	ir(31 downto 27) = "01000"	else	--AND
---		"001001" when	ir(31 downto 27) = "01001"	else	--OR
---		"001010" when	ir(31 downto 27) = "01010"	else	--ADD
---		"001011" when 	ir(31 downto 27) = "01011"	else	--SUB
---		"001101" when	ir(31 downto 27) = "01101"	else 	--IADD
---		"001110" when 	ir(31 downto 27) = "01110"	else	--SHL
---		"001111" when	ir(31 downto 27) = "01111"	else	--SHR
---
---		"010000" when	ir(31 downto 27) = "11000"	else	--JZ
---		"000000";
---
 ----------------------------------- Decoding Circuit ----------------------------------------------
 	ex(5) <= 	  '1' when ir(31 downto 27) = "00101"				else	--IN
 			  '0';
 
-	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "11000"			else	--JZ
+	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "00100"			else	--OUT
+			  "00100" when ir(31 downto 27) = "01100" or 				--SWAP
+			  ir(31 downto 27) = "10000" or ir(31 downto 27) = "10001"	else	--PUSH - POP
 			  ir(31 downto 27) when 
 			  (ir(31 downto 30) = "01" and ir(29 downto 27) /= "100") or 	 	--AND - OR - ADD - SUB - IADD - SHL - SHR
 			  (ir(31 downto 29) = "000" and ((ir(28) or ir(27))='1')) 	else 	--NOT - INC - DEC
@@ -106,11 +93,14 @@ begin
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		zero;
 
-	jump_cat <=	'1' when ir(31 downto 30) = "11" else	--JZ - JMP - CALL - RET - RTI
-			'0';
+	jump_cat 	<=	'1' when ir(31 downto 30) = "11" 	else	--JZ - JMP - CALL - RET - RTI
+				'0';
 
-	uncond_jump <=	'0' when ir(29 downto 27) = "000" else	--JZ
-			'1';
+	uncond_jump 	<=	'0' when ir(29 downto 27) = "000" 	else	--JZ
+				'1';
+
+	jz 		<= 	'1' when ir(31 downto 27) = "11000" 	else	--JZ
+				'0';
 
 ---------------------------------- Register File -----------------------------------------------------------
 	u0: entity work.Reg port map(clk,rst,en0,R0_in,R0);
