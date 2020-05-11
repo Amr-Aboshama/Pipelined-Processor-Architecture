@@ -52,8 +52,9 @@ BEGIN
     --------------------------------------------------------------SETTING RESULT----------------------------------------------------------------------------
     --======================================================================================================================================================
 
-    OUTPUT_RESULT <= OPERAND1       WHEN SEL ="0000"                                                                --CASE: IDLE "PASS OPERAND1"
-                ELSE LOGIC_RESULT   WHEN SEL="1111" OR SEL="1110" OR SEL = "0001" OR SEL = "1001" OR SEL = "1000"   --CASE: LOGIC OR SHIFTING OPERATION
+    OUTPUT_RESULT <= OPERAND2       WHEN SEL ="0000"                                                                --CASE: IDLE "PASS OPERAND2"
+                ELSE OPERAND1       WHEN SEL ="0100"                                                                --CASE: PASS OPERAND1
+                ELSE LOGIC_RESULT   WHEN SEL ="1111" OR SEL="1110" OR SEL = "0001" OR SEL = "1001" OR SEL = "1000"  --CASE: LOGIC OR SHIFTING OPERATION
                 ELSE ARITHMETIC_RESULT(N-1 DOWNTO 0);                                                               --CASE: ARITHMETIC OPERATION
 
     RESULT <= OUTPUT_RESULT;            --THE PHYSICAL OUTPUT
@@ -70,12 +71,12 @@ BEGIN
 
     --ZERO_FLAG:        "ZERO_FLAG"
     --DON'T CHANGE IN CASE OF IDLE
-    ZERO_FLAG <= '1'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) =  X"00000000" AND SEL /="0000"       --CASE: RESULT  = 0 && !IDLE
-            ELSE '0'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) /= X"00000000" AND SEL /="0000";      --CASE: RESULT != 0 && !IDLE
+    ZERO_FLAG <= '1'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) =  X"00000000" AND SEL /="0000" AND SEL /="0100"       --CASE: RESULT  = 0 && (!IDLE||!PASS OP2)
+            ELSE '0'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) /= X"00000000" AND SEL /="0000" AND SEL /="0100";      --CASE: RESULT != 0 && (!IDLE||!PASS OP2)
 
     --NEGATIVE_FLAGE:       "NEG_FLAG"
     --DON'T CHANGE IN CASE OF IDLE
-    NEG_FLAG <= OUTPUT_RESULT(N-1) WHEN SEL /="0000";                                               --CASE: !IDLE
+    NEG_FLAG <= OUTPUT_RESULT(N-1) WHEN SEL /="0000" AND SEL /="0100";                                               --CASE: !IDLE
 
     --======================================================================================================================================================
 

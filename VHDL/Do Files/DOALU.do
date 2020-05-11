@@ -77,5 +77,11 @@ run 100
 force OPERAND1 32'h00000000
 force OPERAND2 32'h00000001
 force SEL 0000
-puts "13# idle=> h'00000000 :: res = h'00000000 , c=1, n=1, z=0"
+puts "13# idle=> h'00000001 :: res = h'00000001 , c=1, n=1, z=0"
+run 100
+
+force OPERAND1 32'h00000000
+force OPERAND2 32'h00000001
+force SEL 0100
+puts "14# pass op1=> h'00000000 :: res = h'00000000 , c=1, n=1, z=0"
 run 100
