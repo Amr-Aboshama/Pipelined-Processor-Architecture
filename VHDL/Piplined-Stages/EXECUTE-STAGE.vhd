@@ -6,7 +6,7 @@ ENTITY EXECUTE_STAGE IS
     PORT(
         --INPUTS
         Rsrc1,Rsrc2,EXT_IN                          : IN STD_LOGIC_VECTOR (31 DOWNTO 0);    --PC MAYBE CANCELLED
-        Rsrc1_num,Rsrc2_num,Rdst1_INnum,Rdst2_INnum : IN STD_LOGIC_VECTOR (2 DOWNTO 0);     
+        Rsrc1_num,Rsrc2_num,Rdst1_INnum             : IN STD_LOGIC_VECTOR (2 DOWNTO 0);     
         WB_IN                                       : IN STD_LOGIC_VECTOR (4 DOWNTO 0);     --NEEDED
         --M_IN                                        : IN STD_LOGIC_VECTOR (3 DOWNTO 0);     --MAY BE CANCELLED
         EX_IN                                       : IN STD_LOGIC_VECTOR (5 DOWNTO 0);     
