@@ -65,7 +65,7 @@ begin
 	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,flag_reg,
 						  ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
-	DE_IN <= std_logic_vector(FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
+	DE_IN <= std_logic_vector("000" & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
@@ -80,10 +80,10 @@ begin
 	---------- PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + "00" ---------
 	FD: entity work.Reg generic map(68) port map(CLK, RST, FD_ENABLE, FD_IN, FD_OUT);
 
-	------ PC(151 downto 120) + EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) -------- 
+	------ "000"(155 downto 153) + JZ(152) + PC(151 downto 120) + EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) -------- 
 	----------- Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
 	----------------------- EX(14 downto 9) + M(8 downto 5) + WB(4 downto 0) --------------------------
-	DE: entity work.Reg generic map(152) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
+	DE: entity work.Reg generic map(156) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
 
 	---------- PC(138 downto 107) + MEM_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8)+ Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
