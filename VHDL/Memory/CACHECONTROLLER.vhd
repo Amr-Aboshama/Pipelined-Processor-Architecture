@@ -65,7 +65,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
   	PROCESS (CLK) IS
       	VARIABLE DATAINBUFFER : STD_LOGIC_VECTOR (DATASIZE-1 DOWNTO 0);
         VARIABLE ADDRESSBUFFER : STD_LOGIC_VECTOR (10 DOWNTO 0);
-		
+        VARIABLE MEMORYDONEWRITING_LATCH: STD_LOGIC;
         BEGIN
         IF ( FALLING_EDGE(CLK)) THEN
         	-- DEFAULT VALUE FOR OUTPUT SIGALS
@@ -74,8 +74,13 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
             CACHEREAD <= '0';
             CACHEWRITE <= '0';
             CACHETOMEMWRITE <= '0';
-    		CACHEFROMMEMREAD <= '0';
+    		    CACHEFROMMEMREAD <= '0';
             
+
+            IF (MEMORYDONEWRITING = '1')  THEN
+              MEMORYDONEWRITING_LATCH := '1';
+            END IF;
+
             IF (READSIGNAL = '1' OR WRITESIGNAL = '1') THEN
               ADDRESSBUFFER := ADDRESSIN;
               DATAINBUFFER := DATAIN;
@@ -101,7 +106,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
               	      END IF; -- END IF COUNTERREAD0
                       
                       
-                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' OR DIRTYTRIGGER1 = '1') THEN -- NOT DIRTY
+                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' OR (DIRTYTRIGGER1 = '1' AND MEMORYDONEWRITING_LATCH = '1')) THEN -- NOT DIRTY
                     	IF ( COUNTERREAD1 = 0) THEN -- WRITE TO CACHE (MEMORY TO CACHE)
                           MEMREAD <= '1';
                           ADDRESSOUT <= ADDRESSBUFFER(10 DOWNTO 3) & "000";
@@ -122,6 +127,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
                           READSELFLATCH <= '0';
                           DIRTYTRIGGER1 <= '0';
                           COUNTERREAD1 <= 0;
+                          MEMORYDONEWRITING_LATCH := '0';
                         END IF; -- COUNTERREAD1 IF     
                     
                     END IF; -- IF DIRTY OR NOT
@@ -149,7 +155,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
                             DIRTYTRIGGER2 <= '1';
                             COUNTERWRITE0 <= 0;
                         END IF; -- IF FOR COUNTERWRITE0
-                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' OR DIRTYTRIGGER2 = '1') THEN-- DIRTYBIT IS NOT SET
+                    ELSIF (DIRTY(TO_INTEGER(UNSIGNED(ADDRESSBUFFER(7 DOWNTO 3)))) /= '1' OR (DIRTYTRIGGER2 = '1' AND MEMORYDONEWRITING_LATCH = '1')) THEN-- DIRTYBIT IS NOT SET
                     	IF (COUNTERWRITE1 = 0) THEN  --WRITE TO CACHE (MEMORY TO CACHE)
                             MEMREAD <= '1';
                             ADDRESSOUT <= ADDRESSIN(10 DOWNTO 3) & "000";
@@ -175,6 +181,7 @@ ARCHITECTURE CONTROLLERARCH OF CACHECONTROLLER IS
                             WRITESELFLATCH <= '0';
                         	DIRTYTRIGGER2 <= '0';
                             COUNTERWRITE1 <= 0;
+                            MEMORYDONEWRITING_LATCH := '0';
                        END IF; -- IF FOR COUNTERWRITE1
                        
                  END IF; -- DIRTY BIT   
