@@ -13,3 +13,4 @@
 - While Changing PC, "CHANGE_PC" should be high for two cycles.
 - Reset is Done in "14" cycles.
 - MEMORY Read Done is high for 2 cycles
+- Decode Works at falling edge of FD_ENABLE

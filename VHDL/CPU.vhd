@@ -3,8 +3,10 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity CPU is
-	port(	CLK,RST,INT: 	in std_logic
-	    
+	port(	
+		CLK,RST,INT: 	IN std_logic;
+		INPUT_PORT:		IN std_logic_vector(31 downto 0);
+		OUTPUT_PORT:	OUT std_logic_vector(31 downto 0)
 	);
 end CPU;
 
@@ -13,6 +15,7 @@ architecture CPU_ARCH of CPU is
 	signal FD_ENABLE,DE_ENABLE: 					std_logic;
 	signal FD_IN, FD_OUT: 						std_logic_vector(67 downto 0);
 	signal DE_IN, DE_OUT: 						std_logic_vector(151 downto 0);
+	signal EM_IN, EM_OUT: 						std_logic_vector(147 downto 0);
 	signal MWB_IN, MWB_OUT: 					std_logic_vector(138 downto 0);
 	
 	-----------> FETCH Signals <-------------
@@ -36,6 +39,9 @@ architecture CPU_ARCH of CPU is
 	signal ext,Rsrc2,Rsrc1:						std_logic_vector(31 downto 0);
 
 	-----------> EXECUTE Signals <-------------
+	signal RDST1_NUM, RDST2_NUM:		std_logic_vector(2 downto 0);
+	signal FLAG_REG:					std_logic_vector(3 downto 0);
+	signal EX_RESULT1, EX_RESULT2:		std_logic_vector(31 downto 0);
 
 	-----------> MEMORY Signals <--------------
 
@@ -69,6 +75,14 @@ begin
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
+	EXECUTE: entity work.EXECUTE_STAGE port map(DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(119 downto 88),
+												DE_OUT(23 downto 21), DE_OUT(20 downto 18), DE_OUT(17 downto 15),
+												DE_OUT(4 downto 0), DE_OUT(14 downto 9), RST, INT, DE_OUT(152), INPUT_PORT,
+												OUTPUT_PORT, RDST1_NUM, RDST2_NUM, FLAG_REG, EX_RESULT1, EX_RESULT2);
+
+	EM_IN <= std_logic_vector( '0' & DE_OUT(151 downto 120) & FLAG_REG & DE_OUT(119 downto 88)  & EX_RESULT1 & EX_RESULT2
+								& RDST1_NUM & RDST2_NUM & DE_OUT(8 downto 0) );
+	
 	-------------------------------------------> MEMORY_STAGE <--------------------------------------------------
 
 	------------------------------------------> WRITEBACK_STAGE <------------------------------------------------
@@ -84,6 +98,11 @@ begin
 	----------- Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
 	----------------------- EX(14 downto 9) + M(8 downto 5) + WB(4 downto 0) --------------------------
 	DE: entity work.Reg generic map(156) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
+
+	---------- '0'(147) + PC(146 downto 115) + FR(114 downto 111) + EXT(110 downto 79) + EX1_RESUT(78 downto 47) ---------
+	------------------ EX2_RESUTL(46 downto 15) + RDST1_NUM(14 downto 12) + RDST2_NUM(11 downto 9) ----------------------
+	------------------------------------------ M(8 downto 5) + WB(4 downto 0) -------------------------------------------
+	EM: entity work.Reg generic map(148) port map(CLK, RST, EM_ENABLE, EM_IN, EM_OUT);
 
 	---------- PC(138 downto 107) + MEM_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8)+ Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
