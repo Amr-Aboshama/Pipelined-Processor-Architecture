@@ -62,14 +62,14 @@ BEGIN
             ELSE Z;
 
     --SELECTORS:
-    SEL <= (OTHERS => '0') WHEN RESET ='1'
+    SEL <= "1010" WHEN RESET ='1'
             ELSE EX_IN(3 DOWNTO 0);
 
     --ALU COMPONENT:
     ALU_COMP: ALU GENERIC MAP (32) PORT MAP (ALU_OP1,ALU_OP2,SEL,C,N,Z,ALU_RESULT_INTERNAL);
 
     --SET OPERANDS::
-    ALU_OP1 <= (OTHERS => '0') WHEN RESET = '1' 
+    ALU_OP1 <= (0 =>'1' , OTHERS => '0') WHEN RESET = '1' 
             ELSE Rsrc1;
 
     ALU_OP2 <= (OTHERS => '0') WHEN RESET ='1' 
