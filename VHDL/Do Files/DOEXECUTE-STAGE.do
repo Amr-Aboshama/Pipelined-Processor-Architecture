@@ -3,6 +3,20 @@ vsim work.EXECUTE_STAGE
 add wave *
 
 force -freeze sim:/execute_stage/RESET 1
+force -freeze sim:/execute_stage/Rsrc1 32'h00000000 
+force -freeze sim:/execute_stage/Rsrc2 32'h00000000 
+force -freeze sim:/execute_stage/EXT_IN 32'h00000000 
+force -freeze sim:/execute_stage/INPUT_PORT 32'h00000000 
+force -freeze sim:/execute_stage/Rsrc1_num 000
+force -freeze sim:/execute_stage/Rsrc2_num 000 
+force -freeze sim:/execute_stage/Rdst1_INnum 000
+force -freeze sim:/execute_stage/Rdst2_INnum 000
+force -freeze sim:/execute_stage/EX_IN 000000
+force -freeze sim:/execute_stage/INTERRUPT 0
+force -freeze sim:/execute_stage/JZ 0
+force -freeze sim:/execute_stage/WB_IN 00000
+
+
 run 100
 
 force -freeze sim:/execute_stage/RESET 0 
@@ -76,4 +90,13 @@ force -freeze sim:/execute_stage/EX_IN 001101
 force -freeze sim:/execute_stage/WB_IN 00101  
 puts "CASE #08 :IADD"
 puts "ALU_RESULT = 7,c=0, n=0, z=0"
+run 100
+
+force -freeze sim:/execute_stage/Rsrc1 32'h00000004
+force -freeze sim:/execute_stage/Rsrc2 32'h00000005
+force -freeze sim:/execute_stage/EXT_IN 32'h00000003
+force -freeze sim:/execute_stage/EX_IN 001011
+force -freeze sim:/execute_stage/WB_IN 00101  
+puts "CASE #08 :sub"
+puts "ALU_RESULT = h'ffffffff ,c=1, n=1, z=0"
 run 100

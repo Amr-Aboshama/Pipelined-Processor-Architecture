@@ -17,9 +17,9 @@ ENTITY EXECUTE_STAGE IS
         OUTPUT_PORT                                 : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
         Rdst1_OUTnum,Rdst2_OUTnum                   : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
         FLAG_REG                                    : OUT STD_LOGIC_VECTOR (3 DOWNTO 0);
-        ALU_RESULT,RESULT,EXT_OUT                   : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);   --EXT_OUT MAYBE CANCELLED
-        WB_OUT                                      : OUT STD_LOGIC_VECTOR (4 DOWNTO 0);    --MAYBE CANCELLED
-        M_OUT                                       : OUT STD_LOGIC_VECTOR (3 DOWNTO 0)     --MAYBE CANCELLED
+        ALU_RESULT,RESULT                           : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)   --EXT_OUT MAYBE CANCELLED
+        --WB_OUT                                      : OUT STD_LOGIC_VECTOR (4 DOWNTO 0);    --MAYBE CANCELLED
+        --M_OUT                                       : OUT STD_LOGIC_VECTOR (3 DOWNTO 0)     --MAYBE CANCELLED
     );
 END EXECUTE_STAGE;
 
