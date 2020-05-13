@@ -55,13 +55,16 @@ begin
 	ex(5) <= 	  '1' when ir(31 downto 27) = "00101"				else	--IN
 			  '0';
 
-	ex(4 downto 0) <= "10000" when ir(31 downto 27) = "00100"			else	--OUT
-			  "00100" when ir(31 downto 27) = "01100" or 				--SWAP
+	ex(4) <= 	  '1' when ir(31 downto 27) = "00100"				else	--OUT
+			  '0';
+
+	ex(3 downto 0) <= "0100" when ir(31 downto 27) = "01100" or 				--SWAP
+			  (ir(31 downto 29) = "110" and (ir(28)/='1' or ir(27)/='1')) or	--JZ - JMP - CALL
 			  ir(31 downto 27) = "10000" or ir(31 downto 27) = "10101"	else	--PUSH - STD
-			  ir(31 downto 27) when 
+			  ir(30 downto 27) when 
 			  (ir(31 downto 30) = "01" and ir(29 downto 27) /= "100") or 	 	--AND - OR - ADD - SUB - IADD - SHL - SHR
 			  (ir(31 downto 29) = "000" and ((ir(28) or ir(27))='1')) 	else 	--NOT - INC - DEC
-			  "00000";
+			  "0000";
 
  	m <= 	"0101" when 	ir(31 downto 27) = "10000" or 		--PUSH
 				ir(31 downto 27) = "11010" 	else	--CALL

@@ -316,7 +316,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "JZ Rdst Failed for EX" 					severity error;
+	assert (ex="000100") 	report "JZ Rdst Failed for EX" 					severity error;
 	assert (m="0000") 	report "JZ Rdst Failed for MEM" 				severity error;	
 	assert (wb="01000") 	report "JZ Rdst Failed for WB" 					severity error;	
 	assert (Rsrc1_num="001")report "JZ Rdst Failed for Rsrc1_num" 				severity error;
@@ -329,7 +329,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "JMP Rdst Failed for EX" 				severity error;
+	assert (ex="000100") 	report "JMP Rdst Failed for EX" 				severity error;
 	assert (m="0000") 	report "JMP Rdst Failed for MEM" 				severity error;	
 	assert (wb="11000") 	report "JMP Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "JMP Rdst Failed for Rsrc1_num" 				severity error;
@@ -342,7 +342,7 @@ begin
 	
 	wait for 2 ns;
 	
-	assert (ex="000000") 	report "CALL Rdst Failed for EX" 				severity error;
+	assert (ex="000100") 	report "CALL Rdst Failed for EX" 				severity error;
 	assert (m="0101") 	report "CALL Rdst Failed for MEM" 				severity error;	
 	assert (wb="11000") 	report "CALL Rdst Failed for WB" 				severity error;	
 	assert (Rsrc1_num="001")report "CALL Rdst Failed for Rsrc1_num" 			severity error;
