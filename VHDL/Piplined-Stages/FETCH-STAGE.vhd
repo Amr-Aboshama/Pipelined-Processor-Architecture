@@ -56,7 +56,6 @@ BEGIN
 
     BEGIN
         IF(ENABLE='1')  THEN
-            
 
             IF(RST'EVENT)   THEN
                 COUNTER := 0;
@@ -68,7 +67,6 @@ BEGIN
                 MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
             END IF;
 
-            
             IF(RST='1' OR (INT='1' AND STALL_REG='0')) THEN
                 STALL_REG <= '1';
                 
@@ -76,7 +74,6 @@ BEGIN
                 INST2 <= (OTHERS=>'0');
                 OPCODE <= (OTHERS=>'0');
 
-                
                 IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
                     IF(COUNTER=0)   THEN
                         COUNTER := 1;
@@ -132,7 +129,6 @@ BEGIN
 
             END IF;
                 
-
         END IF;
 
     END PROCESS ;

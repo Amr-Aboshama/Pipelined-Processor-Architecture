@@ -14,7 +14,7 @@ architecture CPU_ARCH of CPU is
 	-----------> Intermediate Registers Signals <-------------
 	signal FD_ENABLE,DE_ENABLE: 					std_logic;
 	signal FD_IN, FD_OUT: 						std_logic_vector(67 downto 0);
-	signal DE_IN, DE_OUT: 						std_logic_vector(151 downto 0);
+	signal DE_IN, DE_OUT: 						std_logic_vector(155 downto 0);
 	signal EM_IN, EM_OUT: 						std_logic_vector(147 downto 0);
 	signal MWB_IN, MWB_OUT: 					std_logic_vector(138 downto 0);
 	
@@ -33,7 +33,7 @@ architecture CPU_ARCH of CPU is
 	signal jump_cat,uncond_jump,jz:					std_logic;
 	signal intr:							std_logic_vector(1 downto 0);
 	signal Rsrc1_num,Rsrc2_num,Rdst_num:				std_logic_vector(2 downto 0);
-	signal flag_reg,m_to_DE:					std_logic_vector(3 downto 0);
+	signal m_to_DE:					std_logic_vector(3 downto 0);
 	signal wb_to_DE:						std_logic_vector(4 downto 0);
 	signal ex_to_DE:						std_logic_vector(5 downto 0);
 	signal ext,Rsrc2,Rsrc1:						std_logic_vector(31 downto 0);
@@ -68,7 +68,7 @@ begin
 	FD_IN <= std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & "00");	
 
 	------------------------------------------> DECODE_STAGE <--------------------------------------------------
-	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,flag_reg,
+	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,FLAG_REG,
 						  ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
 	DE_IN <= std_logic_vector("000" & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
@@ -102,7 +102,7 @@ begin
 	---------- '0'(147) + PC(146 downto 115) + FR(114 downto 111) + EXT(110 downto 79) + EX1_RESUT(78 downto 47) ---------
 	------------------ EX2_RESUTL(46 downto 15) + RDST1_NUM(14 downto 12) + RDST2_NUM(11 downto 9) ----------------------
 	------------------------------------------ M(8 downto 5) + WB(4 downto 0) -------------------------------------------
-	EM: entity work.Reg generic map(148) port map(CLK, RST, EM_ENABLE, EM_IN, EM_OUT);
+	EM: entity work.Reg generic map(148) port map(CLK, RST, '1', EM_IN, EM_OUT);
 
 	---------- PC(138 downto 107) + MEM_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8)+ Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
