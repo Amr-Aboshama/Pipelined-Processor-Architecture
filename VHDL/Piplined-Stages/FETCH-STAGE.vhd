@@ -55,8 +55,9 @@ BEGIN
     
         VARIABLE COUNTER: INTEGER;
         VARIABLE CHANGE_PC_LATCH: STD_LOGIC := '0';
+        VARIABLE CHANGE_FLAG_LATCH: INTEGER := 0;
         VARIABLE NEW_PC_REG: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
-
+        VARIABLE FLAG_OUT_REG:  STD_LOGIC_VECTOR(2 DOWNTO 0);
     BEGIN
         IF(ENABLE='1')  THEN
 
@@ -114,7 +115,15 @@ BEGIN
                         COUNTER := 0;
                         INST1 <= MEM_DATA;
                         STALL_REG <= '0';
-                        IF(CHANGE_PC_LATCH='1') THEN  
+                        FLAG_OUT(3) <= '0';
+                        IF(CHANGE_PC_LATCH='1') THEN
+                            IF(CHANGE_FLAG_LATCH = 1) THEN
+                                CHANGE_FLAG_LATCH := 2;
+
+                            ELSIF(CHANGE_FLAG_LATCH = 2)  THEN
+                                CHANGE_FLAG_LATCH := 0;
+                                FLAG_OUT <= '1' & FLAG_OUT_REG(2 DOWNTO 0);
+                            END IF;
                             PC <= NEW_PC_REG;
                             CHANGE_PC_LATCH := '0';
                             COUNTER:=0;
@@ -126,6 +135,10 @@ BEGIN
                 END IF;                
 
                 IF(CHANGE_PC='1')   THEN
+                    IF(CHANGE_FLAG = '1')   THEN
+                        CHANGE_FLAG_LATCH := 1;
+                        FLAG_OUT_REG := FLAG_IN(2 DOWNTO 0);
+                    END IF;
                     CHANGE_PC_LATCH := '1';
                     NEW_PC_REG := NEW_PC;
                 END IF;
