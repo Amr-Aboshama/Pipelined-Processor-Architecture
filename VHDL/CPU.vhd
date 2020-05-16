@@ -25,13 +25,13 @@ architecture CPU_ARCH of CPU is
 	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
 	signal INST2, INST1: 								unsigned(15 downto 0);
 	signal HAVE_SRC1, HAVE_SRC2:						std_logic;
-	signal CHANGE_PC:									std_logic;
-	signal PC, NEW_PC:									unsigned(31 downto 0);
+	signal MEMORY_CHANGE_PC:									std_logic;
+	signal PC, MEMORY_PC:									unsigned(31 downto 0);
 	signal FETCH_FR:									std_logic_vector(3 downto 0);
 
 	-----------> DECODE Signals <-------------
 	signal hazard_detected:					std_logic;
-	signal branching,jz:					std_logic;
+	signal BRANCH_CHANGE_PC,jz:					std_logic;
 	signal intr:							std_logic_vector(1 downto 0);
 	signal Rsrc1_num,Rsrc2_num,Rdst_num:	std_logic_vector(2 downto 0);
 	signal m_to_DE:							std_logic_vector(6 downto 0);
@@ -76,14 +76,14 @@ begin
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
-														INST1, INST2, HAVE_SRC1, HAVE_SRC2, CHANGE_PC, NEW_PC, MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
+														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_CHANGE_PC, BRANCH_CHANGE_PC, MEMORY_PC, unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
 	
 	FD_IN <= FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & "00");
 
 	------------------------------------------> DECODE_STAGE <--------------------------------------------------
 	-- TODO: ADD GROUP_SEL1 (2 BITS) & GROUP_SEL2 (1 BIT)
 	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,FLAG_REG,
-						  ext,Rsrc2,Rsrc1,branching,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
+						  ext,Rsrc2,Rsrc1,BRANCH_CHANGE_PC,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
 	DE_IN <= std_logic_vector(FD_OUT(71 DOWNTO 68) & m_to_DE(2 downto 0) & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE(6 downto 3) & wb_to_DE);
 

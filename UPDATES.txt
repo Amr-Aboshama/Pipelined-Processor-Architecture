@@ -14,3 +14,8 @@
 - Reset is Done in "14" cycles.
 - MEMORY Read Done is high for 2 cycles
 - Decode Works at falling edge of FD_ENABLE
+
+
+# Data & Control Hzards in changing PC value between MEMORY_STAGE & DECODE_STAGE 
+    - Example:  RTI
+                JMP 1
