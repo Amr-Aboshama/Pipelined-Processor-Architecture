@@ -19,10 +19,10 @@ use ieee.numeric_std.all;
 --	Rsrc2 		(32 bits),	Rsrc1 		(32 bits)
 --	Rscr2_num 	(3 bits),	Rsrc1_num 	(3 bits)
 --	Rdst_num 	(3 bits),
---	WB 		(5 bits),	M 		(4 bits),	EX 		(6 bits)
+--	WB 		(5 bits),	M 		(7 bits),	EX 		(6 bits)
 
 -- Output bits to others
---	jump_cat,	(1 bit),	uncond_jump	(1 bit)
+--	branch_signal,	(1 bit)
 
 entity decode_stage is
 port(	clk, rst:					in std_logic;
@@ -34,9 +34,9 @@ port(	clk, rst:					in std_logic;
 	flag_reg:					in std_logic_vector(3 downto 0);
 
 	ext,Rsrc2,Rsrc1:				out std_logic_vector(31 downto 0);
-	jump_cat,uncond_jump,jz:			out std_logic;
+	branch_signal,jz:				out std_logic;
 	Rsrc1_num,Rsrc2_num,Rdst_num:			out std_logic_vector(2 downto 0);
-	m:						out std_logic_vector(3 downto 0);
+	m:						out std_logic_vector(6 downto 0);
 	wb:						out std_logic_vector(4 downto 0);
 	ex:						out std_logic_vector(5 downto 0)
 );
@@ -66,15 +66,20 @@ begin
 			  (ir(31 downto 29) = "000" and ((ir(28) or ir(27))='1')) 	else 	--NOT - INC - DEC
 			  "0000";
 
- 	m <= 	"0101" when 	ir(31 downto 27) = "10000" or 		--PUSH
-				ir(31 downto 27) = "11010" 	else	--CALL
-		"1000" when 	ir(31 downto 27) = "10001" or 		--POP
-				ir(31 downto 27) = "11011" or 		--RET
-				ir(31 downto 27) = "11100"	else	--RTI
-		"0111" when 	ir(31 downto 27) = "10101"	else	--STD
-		"1011" when	ir(31 downto 27) = "10110"	else	--LDD
-		"0011" when	ir(31 downto 27) = "10111"	else	--LDM
-		"0000";
+ 	m(6 downto 3) <= 	"0101" when 	ir(31 downto 27) = "10000" or 		--PUSH
+						ir(31 downto 27) = "11010" 	else	--CALL
+				"1000" when 	ir(31 downto 27) = "10001" or 		--POP
+						ir(31 downto 27) = "11011" or 		--RET
+						ir(31 downto 27) = "11100"	else	--RTI
+				"0111" when 	ir(31 downto 27) = "10101"	else	--STD
+				"1011" when	ir(31 downto 27) = "10110"	else	--LDD
+				"0011" when	ir(31 downto 27) = "10111"	else	--LDM
+				"0000";
+
+	m(2 downto 0) <=	"001" when	ir(31 downto 27) = "10000" 	else 	--PUSH
+				"100" when	ir(31 downto 27) = "10001" 	else	--POP
+				"010" when 	ir(31 downto 27) = "11100"	else	--RTI
+				"000";
 	
 	wb <=	"00111" when	ir(31 downto 27) = "01100"	else	--SWAP
 		"00101" when	(ir(31 downto 30) = "00" and 
@@ -96,11 +101,12 @@ begin
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		zero;
 
-	jump_cat 	<=	'1' when ir(31 downto 30) = "11" 	else	--JZ - JMP - CALL - RET - RTI
+	branch_signal	<=	'1' when  (ir(31 downto 30) = "11" and 		--JMP - CALL
+					  ((ir(28) xor ir(27))='1')) or
+					  (ir(31 downto 27) = "11000" and	--JZ
+					  flag_reg(0) = '1')		else
 				'0';
-
-	uncond_jump 	<=	'0' when ir(29 downto 27) = "000" 	else	--JZ
-				'1';
+					
 
 	jz 		<= 	'1' when ir(31 downto 27) = "11000" 	else	--JZ
 				'0';
