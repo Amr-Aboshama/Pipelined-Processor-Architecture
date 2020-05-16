@@ -12,33 +12,34 @@ end CPU;
 
 architecture CPU_ARCH of CPU is
 	-----------> Intermediate Registers Signals <-------------
-	signal DE_ENABLE, EM_ENABLE: 					std_logic;
-	signal FD_IN, FD_OUT: 						std_logic_vector(67 downto 0);
-	signal DE_IN, DE_OUT: 						std_logic_vector(155 downto 0);
+	signal DE_ENABLE, EM_ENABLE: 				std_logic;
+	signal FD_IN, FD_OUT: 						std_logic_vector(71 downto 0);
+	signal DE_IN, DE_OUT: 						std_logic_vector(159 downto 0);
 	signal EM_IN, EM_OUT: 						std_logic_vector(151 downto 0);
 	signal MWB_IN, MWB_OUT: 					std_logic_vector(139 downto 0);
 	
 	-----------> FETCH Signals <-------------
-	signal FETCH_ENABLE, FETCH_DONE:						std_logic;
-	signal INST_MEM_DATA:						std_logic_vector(15 downto 0);
-	signal INST_MEM_ADD:						unsigned(10 downto 0);
-	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:		std_logic;
-	signal INST2, INST1: 						unsigned(15 downto 0);
-	signal HAVE_SRC1, HAVE_SRC2:					std_logic;
-	signal CHANGE_PC:						std_logic;
-	signal PC, NEW_PC:						unsigned(31 downto 0);
+	signal FETCH_ENABLE, FETCH_DONE:					std_logic;
+	signal INST_MEM_DATA:								std_logic_vector(15 downto 0);
+	signal INST_MEM_ADD:								unsigned(10 downto 0);
+	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
+	signal INST2, INST1: 								unsigned(15 downto 0);
+	signal HAVE_SRC1, HAVE_SRC2:						std_logic;
+	signal CHANGE_PC:									std_logic;
+	signal PC, NEW_PC:									unsigned(31 downto 0);
+	signal FETCH_FR:									std_logic_vector(3 downto 0);
 
 	-----------> DECODE Signals <-------------
-	signal hazard_detected:						std_logic;
-	signal jump_cat,uncond_jump,jz:					std_logic;
+	signal hazard_detected:					std_logic;
+	signal jump_cat,uncond_jump,jz:			std_logic;
 	signal intr:							std_logic_vector(1 downto 0);
-	signal Rsrc1_num,Rsrc2_num,Rdst_num:				std_logic_vector(2 downto 0);
-	signal m_to_DE:					std_logic_vector(3 downto 0);
+	signal Rsrc1_num,Rsrc2_num,Rdst_num:	std_logic_vector(2 downto 0);
+	signal m_to_DE:							std_logic_vector(3 downto 0);
 	signal wb_to_DE:						std_logic_vector(4 downto 0);
 	signal ex_to_DE:						std_logic_vector(5 downto 0);
-	signal ext,Rsrc2,Rsrc1:						std_logic_vector(31 downto 0);
-	signal GROUP_SEL1:							STD_LOGIC_VECTOR(1 DOWNTO 0);
-	signal GROUP_SEL2:							STD_LOGIC;
+	signal ext,Rsrc2,Rsrc1:					std_logic_vector(31 downto 0);
+	signal GROUP_SEL1:						STD_LOGIC_VECTOR(1 DOWNTO 0);
+	signal GROUP_SEL2:						STD_LOGIC;
 
 	-----------> EXECUTE Signals <-------------
 	signal RDST1_NUM, RDST2_NUM:		std_logic_vector(2 downto 0);
@@ -47,20 +48,20 @@ architecture CPU_ARCH of CPU is
 
 	-----------> MEMORY Signals <--------------
 	SIGNAL DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE:	STD_LOGIC;
-	SIGNAL DATA_MEM_DATAOUT, DATA_MEM_DATAIN :	STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL DATA_MEM_ADD:	STD_LOGIC_VECTOR(10 DOWNTO 0);
-	SIGNAL MEMORY_FLAG_DONE, MEMORY_PC_DONE, MEMORY_DONE:	STD_LOGIC;
-	SIGNAL MEMORY_PC_OUT, MEMORY_RESULT:	STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL MEMORY_FLAG_REGISTER:	STD_LOGIC_VECTOR(3 DOWNTO 0);
+	SIGNAL DATA_MEM_DATAOUT, DATA_MEM_DATAIN :												STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL DATA_MEM_ADD:																	STD_LOGIC_VECTOR(10 DOWNTO 0);
+	SIGNAL MEMORY_FLAG_DONE, MEMORY_PC_DONE, MEMORY_DONE:									STD_LOGIC;
+	SIGNAL MEMORY_PC_OUT, MEMORY_RESULT:													STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL MEMORY_FLAG_REGISTER:															STD_LOGIC_VECTOR(3 DOWNTO 0);
 
 	----------> WRITEBACK Signals <------------
 	signal mem_result_in,alu_result,result:				std_logic_vector(31 downto 0);
-	signal wb:							std_logic_vector(4 downto 0);
-	signal dst1_num_in,dst2_num_in:					std_logic_vector(2 downto 0);
+	signal wb:											std_logic_vector(4 downto 0);
+	signal dst1_num_in,dst2_num_in:						std_logic_vector(2 downto 0);
 
 	signal dst1_result,dst2_result,mem_result:			std_logic_vector(31 downto 0);
-	signal dst1_en,dst2_en: 					std_logic;
-	signal dst1_num,dst2_num,dst1_num_fr,dst2_num_fr:		std_logic_vector(2 downto 0);
+	signal dst1_en,dst2_en: 							std_logic;
+	signal dst1_num,dst2_num,dst1_num_fr,dst2_num_fr:	std_logic_vector(2 downto 0);
 begin
 
 	--------------------------------------> Instruction Memory <-----------------------------------------------
@@ -68,30 +69,29 @@ begin
 	INST_MEMORY: entity work.MEMORYMODULE generic map(16) port map(CLK, INST_MEM_RD_ENABLE, '0', (others=>'0'), 
 														std_logic_vector(INST_MEM_ADD), INST_MEM_RD_DONE, TMP, INST_MEM_DATA);
 
-
 	-------------------------------------------> DATA Memory <-----------------------------------------------
 
 	DATA_MEMORY: entity work.MEMORYMODULE generic map(32) port map(CLK, DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE, DATA_MEM_DATAIN, 
 														DATA_MEM_ADD, DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_DATAOUT);
-
 	
+
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
-														INST1, INST2, HAVE_SRC1, HAVE_SRC2, CHANGE_PC, NEW_PC);
+														INST1, INST2, HAVE_SRC1, HAVE_SRC2, CHANGE_PC, NEW_PC, MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
 	
-	FD_IN <= std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & "00");	
+	FD_IN <= FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & "00");
 
 	------------------------------------------> DECODE_STAGE <--------------------------------------------------
-	-- TODO: ADD GROUP_SEL1 (2 BITS) & GROUP_SEL1 (1 BIT)
+	-- TODO: ADD GROUP_SEL1 (2 BITS) & GROUP_SEL2 (1 BIT)
 	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,FLAG_REG,
 						  ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
-	DE_IN <= std_logic_vector(GROUP_SEL1 & GROUP_SEL2 & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
+	DE_IN <= std_logic_vector(FD_OUT(71 DOWNTO 68) & GROUP_SEL1 & GROUP_SEL2 & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
-	EXECUTE: entity work.EXECUTE_STAGE port map(DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(119 downto 88),
+	EXECUTE: entity work.EXECUTE_STAGE port map(DE_OUT(159 DOWNTO 156), DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(119 downto 88),
 												DE_OUT(23 downto 21), DE_OUT(20 downto 18), DE_OUT(17 downto 15),
 												DE_OUT(4 downto 0), DE_OUT(14 downto 9), RST, INT, DE_OUT(152), INPUT_PORT,
 												OUTPUT_PORT, RDST1_NUM, RDST2_NUM, FLAG_REG, EX_RESULT1, EX_RESULT2);
@@ -114,15 +114,15 @@ begin
 
 	---------------------------------------> Intermediate Registers <--------------------------------------------
 	
-	---------- PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + "00" ---------
-	FD: entity work.Reg generic map(68) port map(CLK, RST, FETCH_DONE, FD_IN, FD_OUT);
+	---------- ||| FLAG_REGISTER(71 downto 68) + ||| PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + "00" ---------
+	FD: entity work.Reg generic map(72) port map(CLK, RST, FETCH_DONE, FD_IN, FD_OUT);
 
-	------ |||||| GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + ||||  JZ(152) + PC(151 downto 120) + EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) -------- 
+	------ ||| FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + |||  JZ(152) + PC(151 downto 120) + EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) -------- 
 	----------- Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
 	----------------------- EX(14 downto 9) + M(8 downto 5) + WB(4 downto 0) --------------------------
 	DE: entity work.Reg generic map(156) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
 
-	---------- ||||||| "00"(151 downto 150) + GROUP1SELECTOR(149 downto 148) + GROUP2SELECTOR(147) + ||||||| PC(146 downto 115) + FR(114 downto 111) + EXT(110 downto 79) + EX1_RESUT(78 downto 47) ---------
+	---------- ||| "00"(151 downto 150) + GROUP1SELECTOR(149 downto 148) + GROUP2SELECTOR(147) + ||| PC(146 downto 115) + FR(114 downto 111) + EXT(110 downto 79) + EX1_RESUT(78 downto 47) ---------
 	------------------ EX2_RESUT(46 downto 15) + RDST1_NUM(14 downto 12) + RDST2_NUM(11 downto 9) ----------------------
 	------------------------------------------ M(8 downto 5) + WB(4 downto 0) -------------------------------------------
 	EM: entity work.Reg generic map(152) port map(CLK, RST, EM_ENABLE, EM_IN, EM_OUT);
