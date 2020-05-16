@@ -95,7 +95,9 @@ BEGIN
 
     --SWAP INSTRUCTION::
     Rdst1_OUTnum <= (OTHERS => '0') WHEN RESET ='1'
-            ELSE Rsrc2_num          WHEN WB_IN(2 DOWNTO 1) = "11";
+            ELSE Rsrc2_num          WHEN WB_IN(2 DOWNTO 1) = "11"
+            ELSE Rdst1_INnum;
+            
     Rdst2_OUTnum <= (OTHERS => '0') WHEN RESET ='1'
             ELSE Rsrc1_num          WHEN WB_IN(2 DOWNTO 1) = "11";
     RESULT <= (OTHERS => '0')       WHEN RESET ='1' 
