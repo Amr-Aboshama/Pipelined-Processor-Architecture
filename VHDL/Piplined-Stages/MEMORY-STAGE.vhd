@@ -9,7 +9,8 @@ ENTITY MEMORY_STAGE IS
      	CLK : IN STD_LOGIC;
         RST : IN STD_LOGIC;
         INTERRUPT : IN STD_LOGIC;
-        
+		ENABLE:	IN	STD_LOGIC;
+		
         FETCHPC : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
         EXECUTEPC : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
         SIGNEXTENT : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
@@ -38,7 +39,9 @@ ENTITY MEMORY_STAGE IS
         NEWFLAGDONE : OUT STD_LOGIC;
         NEWPC : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
         NEWPCDONE : OUT STD_LOGIC;
-        MEMORYSTAGERESULT : OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
+		MEMORYSTAGERESULT : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+		
+		STALL :	OUT STD_LOGIC
         
      );
 
@@ -69,7 +72,6 @@ ARCHITECTURE MEMORYARCH OF MEMORY_STAGE IS
 	
         
     	BEGIN
-
     
     	IF (FALLING_EDGE(CLK)) THEN    
     	
@@ -77,18 +79,22 @@ ARCHITECTURE MEMORYARCH OF MEMORY_STAGE IS
             NEWPCDONE <= '0';
             NEWFLAGDONE <= '0';
             DATAMEMORYREAD <= '0';
-            DATAMEMORYWRITE <= '0';
+			DATAMEMORYWRITE <= '0';
+			STALL <= '1';
             
             -- HANDLING THE LATCHES FOR RST, INTERRUPT, MEMORYDONEREAD
         	IF (RST = '1') THEN 
             	RESET_LATCH := '1';
-            END IF;
+			END IF;
+			
             IF (INTERRUPT = '1') THEN 
             	INTERRUPT_LATCH := '1';
-            END IF; 
+			END IF; 
+			
             IF (DATAMEMORYDONEREAD = '1') THEN 
             	DATAMEMORYDONEREAD_LATCH := '1';
-            END IF;  
+			END IF;  
+			
             IF (DATAMEMORYDONEWRITE = '1') THEN 
             	DATAMEMORYDONEWRITE_LATCH := '1';
             END IF;
@@ -104,7 +110,8 @@ ARCHITECTURE MEMORYARCH OF MEMORY_STAGE IS
             	NEWPC <= DATAMEMORYDATAOUT;
             	NEWPCDONE <= '1';
             	RSTCOUNTER <= 0; 
-            	RESET_LATCH := '0';
+				RESET_LATCH := '0';
+				DATAMEMORYDONEREAD_LATCH := '0';
             END IF; 
         	
         	
@@ -161,7 +168,8 @@ ARCHITECTURE MEMORYARCH OF MEMORY_STAGE IS
             	ELSIF (INTERRUPTCOUNTER = 2 AND DATAMEMORYDONEWRITE_LATCH = '1') THEN   
             		DATAMEMORYREAD <= '1';
             		DATAMEMORYADDRESS <= "00000000010";  -- ADDRESS OF ISR 
-            		INTERRUPTCOUNTER <= INTERRUPTCOUNTER +1;
+					INTERRUPTCOUNTER <= INTERRUPTCOUNTER +1;
+					DATAMEMORYDONEWRITE_LATCH := '0';
             	ELSIF (INTERRUPTCOUNTER = 3 AND DATAMEMORYDONEREAD_LATCH = '1') THEN 
             		INTERRUPTCOUNTER <= INTERRUPTCOUNTER +1;  
             	ELSIF (INTERRUPTCOUNTER = 4 AND DATAMEMORYDONEREAD_LATCH = '1') THEN 
@@ -173,92 +181,99 @@ ARCHITECTURE MEMORYARCH OF MEMORY_STAGE IS
             	END IF;           
             END IF;
              
-            
-            IF(MEMORYSIGNALS(3) = '1') THEN -- MEMORY READ      
-            	-- FIRST CYCLE FOR EITHER (RET, RTI, POP)
-            	IF (READLATCH = '0') THEN  -- WHEN COUNTERS = 0 
-            		DATAMEMORYREAD <= '1';
-                    DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
-                    READLATCH <= '1'; 
-                    IF (GROUP1SELECTOR = "00") THEN   
-                    	 RETCOUNTER <= RETCOUNTER +1;
-                    ELSIF (GROUP1SELECTOR = "01") THEN 
-                    	RTICOUNTER <= RTICOUNTER +1;
-                    ELSIF (GROUP1SELECTOR = "10") THEN 
-                    	POPCOUNTER <= POPCOUNTER +1;
-                    END IF;
-                    
-            	END IF;  
-            	
-            	-- SECOND CYCLE FOR EITHER (RET, RTI)
-            	IF (((GROUP1SELECTOR = "00" AND RETCOUNTER = 1) OR (GROUP1SELECTOR = "01" AND RTICOUNTER = 1 )) AND DATAMEMORYDONEREAD_LATCH = '1' ) THEN
-            		NEWPC <= DATAMEMORYDATAOUT;
-            		NEWPCDONE <= '1';
-            		DATAMEMORYDONEREAD_LATCH := '0';  
-            		IF (GROUP1SELECTOR = "00") THEN
-            			RETCOUNTER <= 0; 
-            			READLATCH <= '0';    
-            		ELSE
-            			RTICOUNTER <= RTICOUNTER +1;
-            		END IF;  
-            		
-            	END IF; 
-            	
-            	-- SECOND CYCLE FOR POP 
-            	IF (GROUP1SELECTOR = "10" AND POPCOUNTER = 1 AND DATAMEMORYDONEREAD_LATCH = '1') THEN 
-            			MEMORYSTAGERESULT <= DATAMEMORYDATAOUT;
-            			DATAMEMORYDONEREAD_LATCH := '0';
-            			POPCOUNTER <= 0; 
-            			READLATCH <= '0';
-            	END IF;
-            	
-            	-- THIRD CYCLE FOR RTI 
-            	IF (GROUP1SELECTOR = "01" AND RETCOUNTER = 2) THEN  
-            		DATAMEMORYREAD <= '1';
-                    DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
-                    RETCOUNTER <= RETCOUNTER +1;
-            	END IF; 
-            	
-            	-- FOURTH CYCLE FOR RTI 
-            	IF (GROUP1SELECTOR = "01" AND RETCOUNTER = 3 AND DATAMEMORYDONEREAD_LATCH = '1' ) THEN  
-            		FLAGREGISTEROUT <= DATAMEMORYDATAOUT(3 DOWNTO 0);
-            		NEWFLAGDONE <= '1';
-            		DATAMEMORYDONEREAD_LATCH := '0';
-            		RTICOUNTER <= 0; 
-            		READLATCH <= '0';
-            	END IF;
-                
-            ELSIF (MEMORYSIGNALS(2) = '1') THEN  -- MEMORY WRITE   
-            	-- FIRST CYCLE FOR EITHER CALL OR PUSH 
-            	IF (WRITELATCH = '0') THEN   
-            		DATAMEMORYWRITE <= '1';
-               		DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
-               		WRITELATCH <= '1';
-               		IF (GROUP2SELECTOR = '0')  THEN  -- CALL 
-               			DATAMEMORYDATAIN <= EXECUTEPC;
-               			CALLCOUNTER <= CALLCOUNTER +1;
-               		ELSE   -- PUSH   
-               			DATAMEMORYDATAIN <= ALURESULT;
-               			PUSHCOUNTER <= PUSHCOUNTER +1;
-               		END IF;
-            	END IF; -- FIRST CYCLE FOR EITHER CALL OR PUSH 
-            	
-            	-- SECOND CYCLE FOR EITHER CALL OR PUSH 
-            	IF ((CALLCOUNTER = 1 OR PUSHCOUNTER = 1) AND DATAMEMORYDONEWRITE_LATCH = '1') THEN   
-            		IF (CALLCOUNTER = 1) THEN  
-            			NEWPC <= ALURESULT;
-            			NEWPCDONE <= '1'; 
-            			CALLCOUNTER <= 0;
-            		ELSE  
-            			MEMORYSTAGERESULT <= ALURESULT;
-            			PUSHCOUNTER <= 0;
-            		END IF; 
-            		WRITELATCH <= '0';
-            		DATAMEMORYDONEWRITE_LATCH := '0';
-            	END IF; -- SECOND CYCLE FOR EITHER CALL OR PUSH 
-            
+			IF(ENABLE = '1') THEN
 
-            END IF; -- READ OR WRITE
+				IF(MEMORYSIGNALS(3) = '1') THEN -- MEMORY READ      
+					-- FIRST CYCLE FOR EITHER (RET, RTI, POP)
+					IF (READLATCH = '0') THEN  -- WHEN COUNTERS = 0 
+						DATAMEMORYREAD <= '1';
+						DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
+						READLATCH <= '1'; 
+						IF (GROUP1SELECTOR = "00") THEN   
+							RETCOUNTER <= RETCOUNTER +1;
+						ELSIF (GROUP1SELECTOR = "01") THEN 
+							RTICOUNTER <= RTICOUNTER +1;
+						ELSIF (GROUP1SELECTOR = "10") THEN 
+							POPCOUNTER <= POPCOUNTER +1;
+						END IF;
+						
+					END IF;  
+					
+					-- SECOND CYCLE FOR EITHER (RET, RTI)
+					IF (((GROUP1SELECTOR = "00" AND RETCOUNTER = 1) OR (GROUP1SELECTOR = "01" AND RTICOUNTER = 1 )) AND DATAMEMORYDONEREAD_LATCH = '1' ) THEN
+						NEWPC <= DATAMEMORYDATAOUT;
+						NEWPCDONE <= '1';
+						DATAMEMORYDONEREAD_LATCH := '0';  
+						IF (GROUP1SELECTOR = "00") THEN
+							RETCOUNTER <= 0; 
+							READLATCH <= '0';
+							STALL <= '0'; 
+						ELSE
+							RTICOUNTER <= RTICOUNTER +1;
+						END IF;  
+						
+					END IF; 
+					
+					-- SECOND CYCLE FOR POP 
+					IF (GROUP1SELECTOR = "10" AND POPCOUNTER = 1 AND DATAMEMORYDONEREAD_LATCH = '1') THEN 
+							MEMORYSTAGERESULT <= DATAMEMORYDATAOUT;
+							DATAMEMORYDONEREAD_LATCH := '0';
+							POPCOUNTER <= 0; 
+							READLATCH <= '0';
+							STALL <= '0'; 
+					END IF;
+					
+					-- THIRD CYCLE FOR RTI 
+					IF (GROUP1SELECTOR = "01" AND RETCOUNTER = 2) THEN  
+						DATAMEMORYREAD <= '1';
+						DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
+						RETCOUNTER <= RETCOUNTER +1;
+					END IF; 
+					
+					-- FOURTH CYCLE FOR RTI 
+					IF (GROUP1SELECTOR = "01" AND RETCOUNTER = 3 AND DATAMEMORYDONEREAD_LATCH = '1' ) THEN  
+						FLAGREGISTEROUT <= DATAMEMORYDATAOUT(3 DOWNTO 0);
+						NEWFLAGDONE <= '1';
+						DATAMEMORYDONEREAD_LATCH := '0';
+						RTICOUNTER <= 0; 
+						READLATCH <= '0';
+						STALL <= '0'; 
+					END IF;
+					
+				ELSIF (MEMORYSIGNALS(2) = '1') THEN  -- MEMORY WRITE   
+					-- FIRST CYCLE FOR EITHER CALL OR PUSH 
+					IF (WRITELATCH = '0') THEN   
+						DATAMEMORYWRITE <= '1';
+						DATAMEMORYADDRESS <= SECONDMUXOUTPUT(10 DOWNTO 0); 
+						WRITELATCH <= '1';
+						IF (GROUP2SELECTOR = '0')  THEN  -- CALL 
+							DATAMEMORYDATAIN <= EXECUTEPC;
+							CALLCOUNTER <= CALLCOUNTER +1;
+						ELSE   -- PUSH   
+							DATAMEMORYDATAIN <= ALURESULT;
+							PUSHCOUNTER <= PUSHCOUNTER +1;
+						END IF;
+					END IF; -- FIRST CYCLE FOR EITHER CALL OR PUSH 
+					
+					-- SECOND CYCLE FOR EITHER CALL OR PUSH 
+					IF ((CALLCOUNTER = 1 OR PUSHCOUNTER = 1) AND DATAMEMORYDONEWRITE_LATCH = '1') THEN   
+						IF (CALLCOUNTER = 1) THEN  
+							NEWPC <= ALURESULT;
+							NEWPCDONE <= '1'; 
+							CALLCOUNTER <= 0;
+						ELSE  
+							MEMORYSTAGERESULT <= ALURESULT;
+							PUSHCOUNTER <= 0;
+						END IF; 
+						WRITELATCH <= '0';
+						DATAMEMORYDONEWRITE_LATCH := '0';
+						STALL <= '0'; 
+					END IF; -- SECOND CYCLE FOR EITHER CALL OR PUSH 
+				
+
+				END IF; -- READ OR WRITE
+				
+			END IF; -- ENABLE
             
         END IF; -- FALLING EDGE
 
