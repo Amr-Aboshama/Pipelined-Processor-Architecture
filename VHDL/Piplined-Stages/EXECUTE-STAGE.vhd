@@ -5,6 +5,7 @@ USE IEEE.numeric_std.all;
 ENTITY EXECUTE_STAGE IS
     PORT(
         --INPUTS
+        FLAG_IN                                     : IN STD_LOGIC_VECTOR (3 DOWNTO 0);
         Rsrc1,Rsrc2,EXT_IN                          : IN STD_LOGIC_VECTOR (31 DOWNTO 0);    --PC MAYBE CANCELLED
         Rsrc1_num,Rsrc2_num,Rdst1_INnum             : IN STD_LOGIC_VECTOR (2 DOWNTO 0);     
         WB_IN                                       : IN STD_LOGIC_VECTOR (4 DOWNTO 0);     --NEEDED
@@ -55,11 +56,16 @@ BEGIN
     --FLAGS:
     FLAG_REG(3) <= '0';
     FLAG_REG(2) <= '0' WHEN RESET ='1'
-            ELSE C;
+            ELSE C WHEN C /='Z'
+            ELSE FLAG_IN(2) WHEN C ='Z' AND FLAG_IN(3) = '1';
+
     FLAG_REG(1) <= '0' WHEN RESET ='1'
-            ELSE N;
+            ELSE N WHEN N/='Z'
+            ELSE FLAG_IN(1) WHEN N ='Z' AND FLAG_IN(3) = '1';
+
     FLAG_REG(0) <= '0' WHEN RESET ='1'
-            ELSE Z;
+            ELSE Z WHEN Z/='Z'
+            ELSE FLAG_IN(0) WHEN N ='Z' AND FLAG_IN(3) = '1';
 
     --SELECTORS:
     SEL <= "1010" WHEN RESET ='1'

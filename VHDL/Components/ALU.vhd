@@ -67,17 +67,19 @@ BEGIN
     -- DON'T CHANGE IN CASE OF LOGIC OPERATIONS
     COUT <=  ARITHMETIC_RESULT(N)                           WHEN SEL = "0011" OR SEL = "0010" OR SEL = "1011" OR SEL = "1010" OR SEL = "1101"  --ARITHMATIC
         ELSE OPERAND1(to_integer(unsigned(OPERAND2))-1)     WHEN SEL = "1111"                                                                  --SHR
-        ELSE OPERAND1(N-to_integer(unsigned(OPERAND2)))     WHEN SEL = "1110";                                                                 --SHL
+        ELSE OPERAND1(N-to_integer(unsigned(OPERAND2)))     WHEN SEL = "1110"                                                                  --SHL
+        ELSE 'Z';
 
     --ZERO_FLAG:        "ZERO_FLAG"
     --DON'T CHANGE IN CASE OF IDLE
     ZERO_FLAG <= '1'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) =  X"00000000" AND SEL /="0000" AND SEL /="0100"       --CASE: RESULT  = 0 && (!IDLE||!PASS OP2)
-            ELSE '0'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) /= X"00000000" AND SEL /="0000" AND SEL /="0100";      --CASE: RESULT != 0 && (!IDLE||!PASS OP2)
+            ELSE '0'         WHEN OUTPUT_RESULT(N-1 DOWNTO 0) /= X"00000000" AND SEL /="0000" AND SEL /="0100"       --CASE: RESULT != 0 && (!IDLE||!PASS OP2)
+            ELSE 'Z';
 
     --NEGATIVE_FLAGE:       "NEG_FLAG"
     --DON'T CHANGE IN CASE OF IDLE
-    NEG_FLAG <= OUTPUT_RESULT(N-1) WHEN SEL /="0000" AND SEL /="0100";                                               --CASE: !IDLE
-
+    NEG_FLAG <= OUTPUT_RESULT(N-1) WHEN SEL /="0000" AND SEL /="0100"                                                --CASE: !IDLE
+    ELSE 'Z';
     --======================================================================================================================================================
 
 END ALU_FUNC;

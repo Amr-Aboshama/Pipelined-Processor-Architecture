@@ -1,8 +1,11 @@
+vsim work.MEMORYSTAGE_TEST
 add wave -position insertpoint sim:/memorystage_test/*
 
 add wave -position insertpoint sim:/memorystage_test/MEMORY/*
 add wave -position insertpoint sim:/memorystage_test/MEMORYSTAGE/*
-
+add wave -position insertpoint \
+/memorystage_test/MEMORYSTAGE/line__58/DATAMEMORYDONEREAD_LATCH \
+/memorystage_test/MEMORYSTAGE/line__58/DATAMEMORYDONEWRITE_LATCH 
 
 force -freeze sim:/memorystage_test/M_CLK 1 0, 0 {50 ps} -r 100
 # fill the ram in address 0 with 1's 
