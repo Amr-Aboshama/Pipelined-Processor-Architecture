@@ -115,8 +115,8 @@ begin
 	---------- FLAG_REGISTER(71 downto 68) + PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + FETCH_DONE(1) + '0'(0) ---------
 	FD: entity work.Reg generic map(72) port map(CLK, RST, FETCH_DONE, FD_IN, FD_OUT);
 
-	------ "000"(163 downto 161) + FETCH_DONE(160) + FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + JZ(152) + PC(151 downto 120) + EXT(119 downto 88) -------- 
-	----------- Rsrc1(87 downto 56) + Rsrc2(55 downto 24) + Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
+	------ "000"(163 downto 161) + FETCH_DONE(160) + FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + JZ(152) + PC(151 downto 120) -------- 
+	----------- EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) + Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
 	----------------------- EX(14 downto 9) + M(8 downto 5) + WB(4 downto 0) --------------------------
 	DE: entity work.Reg generic map(164) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
 
@@ -136,14 +136,9 @@ begin
 
 	----------------------------------------------------------> SIGNALS <---------------------------------------------------------
 	
-	-- FETCH_ENABLE <= '1'	
-	-- 			WHEN RST ='1'
-	-- 				OR MEMORY_DONE = '1'
-	-- 				OR (MEMORY_DONE = '0' AND FETCH_DONE = '0')
-	-- 			ELSE '0';
-
 	FETCH_ENABLE <= RST OR INT OR MEMORY_DONE;			
 	DE_ENABLE <= FETCH_DONE OR MEMORY_DONE;
 	EM_ENABLE <= FETCH_DONE OR MEMORY_DONE;
-
+	
+	intr <= "00";
 end CPU_ARCH;
