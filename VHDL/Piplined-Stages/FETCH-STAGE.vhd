@@ -19,8 +19,8 @@ ENTITY FETCH_STAGE IS
         MEM_RD_ENABLE:    OUT  STD_LOGIC;
         INST1, INST2:  OUT UNSIGNED(INST_WIDTH-1 DOWNTO 0);
         HAVE_SRC1, HAVE_SRC2: OUT STD_LOGIC;
-        CHANGE_PC:  IN STD_LOGIC;
-        NEW_PC: IN UNSIGNED(DATA_WIDTH-1 DOWNTO 0);
+        MEMORY_CHANGE_PC, BRANCH_CHANGE_PC:  IN STD_LOGIC;
+        MEMORY_PC, BRANCH_PC: IN UNSIGNED(DATA_WIDTH-1 DOWNTO 0);
         CHANGE_FLAG:    IN STD_LOGIC;
         FLAG_IN:    IN  STD_LOGIC_VECTOR(3 DOWNTO 0);
         FLAG_OUT:    OUT    STD_LOGIC_VECTOR(3 DOWNTO 0)
@@ -38,7 +38,7 @@ BEGIN
     
     WRITE_REG <= NOT STALL_REG;
 
-    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR CHANGE_PC = '1'
+    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1'
                     ELSE '1';
 
     HAVE_SRC2 <= '1' WHEN   OPCODE(4 DOWNTO 2) = "010"
@@ -134,13 +134,17 @@ BEGIN
                     
                 END IF;                
 
-                IF(CHANGE_PC='1')   THEN
+                IF(MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1')   THEN
                     IF(CHANGE_FLAG = '1')   THEN
                         CHANGE_FLAG_LATCH := 1;
                         FLAG_OUT_REG := FLAG_IN(2 DOWNTO 0);
                     END IF;
                     CHANGE_PC_LATCH := '1';
-                    NEW_PC_REG := NEW_PC;
+                    IF(MEMORY_CHANGE_PC = '1') THEN
+                        NEW_PC_REG := MEMORY_PC;
+                    ELSE
+                        NEW_PC_REG := BRANCH_PC;
+                    END IF;
                 END IF;
 
             END IF;
