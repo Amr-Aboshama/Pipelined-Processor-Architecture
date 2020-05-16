@@ -38,7 +38,7 @@ BEGIN
     
     WRITE_REG <= NOT STALL_REG;
 
-    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1'
+    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR ENABLE ='0' OR MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1'
                     ELSE '1';
 
     HAVE_SRC2 <= '1' WHEN   OPCODE(4 DOWNTO 2) = "010"
@@ -59,17 +59,19 @@ BEGIN
         VARIABLE NEW_PC_REG: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
         VARIABLE FLAG_OUT_REG:  STD_LOGIC_VECTOR(2 DOWNTO 0);
     BEGIN
+
+        
+        IF(RST'EVENT)   THEN
+            COUNTER := 0;
+        END IF;
+
+        IF(RST'EVENT AND RST='1') THEN
+            MEM_ADD <= TO_UNSIGNED(0,ADDRESS_WIDTH);
+        ELSIF(INT='1' AND STALL_REG='0') THEN
+            MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
+        END IF;
+
         IF(ENABLE='1')  THEN
-
-            IF(RST'EVENT)   THEN
-                COUNTER := 0;
-            END IF;
-
-            IF(RST'EVENT AND RST='1') THEN
-                MEM_ADD <= TO_UNSIGNED(0,ADDRESS_WIDTH);
-            ELSIF(INT='1' AND STALL_REG='0') THEN
-                MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
-            END IF;
 
             IF(RST='1' OR (INT='1' AND STALL_REG='0')) THEN
                 STALL_REG <= '1';
