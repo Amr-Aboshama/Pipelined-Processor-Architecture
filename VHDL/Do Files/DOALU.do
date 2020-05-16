@@ -59,29 +59,29 @@ run 100
 force OPERAND1 32'h00000002
 force OPERAND2 32'h00000001
 force SEL 4'b1001
-puts "10# OR=> h'00000002 || h'00000001 :: res = h'00000003 , c=1, n=0, z=0"
+puts "10# OR=> h'00000002 || h'00000001 :: res = h'00000003 , c=z, n=0, z=0"
 run 100
 
 force OPERAND1 32'h00000002
 force OPERAND2 32'h00000001
 force SEL 4'b1000
-puts "11# AND=> h'00000002 && h'00000001 :: res = h'00000000 , c=1, n=0, z=1"
+puts "11# AND=> h'00000002 && h'00000001 :: res = h'00000000 , c=z, n=0, z=1"
 run 100
 
 force OPERAND1 32'h7fffffff
 force OPERAND2 32'h00000001
 force SEL 4'b0001
-puts "12# NOT=> h'7fffffff :: res = h'80000000 , c=1, n=1, z=0"
+puts "12# NOT=> h'7fffffff :: res = h'80000000 , c=z, n=1, z=0"
 run 100
 
 force OPERAND1 32'h00000000
 force OPERAND2 32'h00000001
 force SEL 4'b0000
-puts "13# idle=> h'00000001 :: res = h'00000001 , c=1, n=1, z=0"
+puts "13# idle=> h'00000001 :: res = h'00000001 , c=z, n=z, z=z"
 run 100
 
 force OPERAND1 32'h00000000
 force OPERAND2 32'h00000001
 force SEL 4'b0100
-puts "14# pass op1=> h'00000000 :: res = h'00000000 , c=1, n=1, z=0"
+puts "14# pass op1=> h'00000000 :: res = h'00000000 , c=z, n=z, z=z"
 run 100

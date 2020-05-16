@@ -10,7 +10,6 @@ force -freeze sim:/execute_stage/INPUT_PORT 32'h00000000
 force -freeze sim:/execute_stage/Rsrc1_num 3'b000
 force -freeze sim:/execute_stage/Rsrc2_num 3'b000 
 force -freeze sim:/execute_stage/Rdst1_INnum 3'b000
-force -freeze sim:/execute_stage/Rdst2_INnum 3'b000
 force -freeze sim:/execute_stage/EX_IN 6'b000000
 force -freeze sim:/execute_stage/INTERRUPT 0
 force -freeze sim:/execute_stage/JZ 0
