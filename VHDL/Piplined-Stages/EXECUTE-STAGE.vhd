@@ -64,6 +64,7 @@ BEGIN
             ELSE FLAG_IN(1) WHEN N ='Z' AND FLAG_IN(3) = '1';
 
     FLAG_REG(0) <= '0' WHEN RESET ='1'
+            ELSE '0'   WHEN JZ ='1'
             ELSE Z WHEN Z/='Z'
             ELSE FLAG_IN(0) WHEN N ='Z' AND FLAG_IN(3) = '1';
 
