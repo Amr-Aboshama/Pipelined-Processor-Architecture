@@ -31,15 +31,13 @@ architecture CPU_ARCH of CPU is
 
 	-----------> DECODE Signals <-------------
 	signal hazard_detected:					std_logic;
-	signal jump_cat,uncond_jump,jz:			std_logic;
+	signal branching,jz:					std_logic;
 	signal intr:							std_logic_vector(1 downto 0);
 	signal Rsrc1_num,Rsrc2_num,Rdst_num:	std_logic_vector(2 downto 0);
-	signal m_to_DE:							std_logic_vector(3 downto 0);
+	signal m_to_DE:							std_logic_vector(6 downto 0);
 	signal wb_to_DE:						std_logic_vector(4 downto 0);
 	signal ex_to_DE:						std_logic_vector(5 downto 0);
 	signal ext,Rsrc2,Rsrc1:					std_logic_vector(31 downto 0);
-	signal GROUP_SEL1:						STD_LOGIC_VECTOR(1 DOWNTO 0);
-	signal GROUP_SEL2:						STD_LOGIC;
 
 	-----------> EXECUTE Signals <-------------
 	signal RDST1_NUM, RDST2_NUM:		std_logic_vector(2 downto 0);
@@ -85,9 +83,9 @@ begin
 	------------------------------------------> DECODE_STAGE <--------------------------------------------------
 	-- TODO: ADD GROUP_SEL1 (2 BITS) & GROUP_SEL2 (1 BIT)
 	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,FLAG_REG,
-						  ext,Rsrc2,Rsrc1,jump_cat,uncond_jump,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
+						  ext,Rsrc2,Rsrc1,branching,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
-	DE_IN <= std_logic_vector(FD_OUT(71 DOWNTO 68) & GROUP_SEL1 & GROUP_SEL2 & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE & wb_to_DE);
+	DE_IN <= std_logic_vector(FD_OUT(71 DOWNTO 68) & m_to_DE(2 downto 0) & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE(6 downto 3) & wb_to_DE);
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
