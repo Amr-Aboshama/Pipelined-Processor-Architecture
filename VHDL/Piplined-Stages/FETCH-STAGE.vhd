@@ -77,6 +77,7 @@ BEGIN
                 INST1 <= (OTHERS=>'0');
                 INST2 <= (OTHERS=>'0');
                 OPCODE <= (OTHERS=>'0');
+                FLAG_OUT <= (OTHERS=>'0');
 
                 IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
                     IF(COUNTER=0)   THEN
