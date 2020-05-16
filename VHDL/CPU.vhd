@@ -19,7 +19,7 @@ architecture CPU_ARCH of CPU is
 	signal MWB_IN, MWB_OUT: 					std_logic_vector(139 downto 0);
 	
 	-----------> FETCH Signals <-------------
-	signal FETCH_ENABLE, FETCH_DONE:					std_logic;
+	signal FETCH_DONE:									std_logic;
 	signal INST_MEM_DATA:								std_logic_vector(15 downto 0);
 	signal INST_MEM_ADD:								unsigned(10 downto 0);
 	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
@@ -74,7 +74,7 @@ begin
 	
 
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
-	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
+	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, MEMORY_DONE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
 														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_CHANGE_PC, BRANCH_CHANGE_PC, MEMORY_PC, unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
 	
@@ -118,7 +118,7 @@ begin
 	------ ||| FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + |||  JZ(152) + PC(151 downto 120) + EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) -------- 
 	----------- Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
 	----------------------- EX(14 downto 9) + M(8 downto 5) + WB(4 downto 0) --------------------------
-	DE: entity work.Reg generic map(156) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
+	DE: entity work.Reg generic map(160) port map(CLK, RST, DE_ENABLE, DE_IN, DE_OUT);
 
 	---------- ||| "00"(151 downto 150) + GROUP1SELECTOR(149 downto 148) + GROUP2SELECTOR(147) + ||| PC(146 downto 115) + FR(114 downto 111) + EXT(110 downto 79) + EX1_RESUT(78 downto 47) ---------
 	------------------ EX2_RESUT(46 downto 15) + RDST1_NUM(14 downto 12) + RDST2_NUM(11 downto 9) ----------------------
@@ -130,4 +130,12 @@ begin
 	MWB: entity work.Reg generic map(140) port map(CLK, RST, MEMORY_DONE, MWB_IN, MWB_OUT);
 
 
+
+
+
+
+	----------------------------------------------------------> SIGNALS <---------------------------------------------------------
+	DE_ENABLE <= FETCH_DONE OR MEMORY_DONE;
+	EM_ENABLE <= FETCH_DONE OR MEMORY_DONE;
+	
 end CPU_ARCH;
