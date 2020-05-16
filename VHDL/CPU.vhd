@@ -19,7 +19,7 @@ architecture CPU_ARCH of CPU is
 	signal MWB_IN, MWB_OUT: 					std_logic_vector(139 downto 0);
 	
 	-----------> FETCH Signals <-------------
-	signal FETCH_DONE:									std_logic;
+	signal FETCH_ENABLE, FETCH_DONE:					std_logic;
 	signal INST_MEM_DATA:								std_logic_vector(15 downto 0);
 	signal INST_MEM_ADD:								unsigned(10 downto 0);
 	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
@@ -74,7 +74,7 @@ begin
 	
 
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
-	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, MEMORY_DONE, INT, FETCH_DONE, PC, 
+	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
 														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_CHANGE_PC, BRANCH_CHANGE_PC, MEMORY_PC, unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
 	
@@ -137,5 +137,5 @@ begin
 	----------------------------------------------------------> SIGNALS <---------------------------------------------------------
 	DE_ENABLE <= FETCH_DONE OR MEMORY_DONE;
 	EM_ENABLE <= FETCH_DONE OR MEMORY_DONE;
-	
+	FETCH_ENABLE <= MEMORY_DONE OR RST;
 end CPU_ARCH;
