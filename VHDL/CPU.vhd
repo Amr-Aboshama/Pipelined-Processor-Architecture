@@ -104,7 +104,7 @@ begin
 								DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_DATAOUT,DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE, DATA_MEM_ADD, DATA_MEM_DATAIN, 
 								MEMORY_FLAG_REGISTER, MEMORY_FLAG_DONE, MEMORY_PC_OUT, MEMORY_PC_DONE, MEMORY_RESULT, MEMORY_DONE);
 
-	MWB_IN <= STD_LOGIC_VECTOR( "000" & EM_OUT(150) & MEMORY_PC_DONE & MEMORY_PC_OUT & MEM_RESULT & EM_OUT(78 DOWNTO 9) & EM_OUT(4 DOWNTO 0) );
+	MWB_IN <= STD_LOGIC_VECTOR( "000" & EM_OUT(150	) & MEMORY_PC_DONE & MEMORY_PC_OUT & MEM_RESULT & EM_OUT(78 DOWNTO 9) & EM_OUT(4 DOWNTO 0) );
 
 	------------------------------------------> WRITEBACK_STAGE <------------------------------------------------
 	WRITEBACK: entity work.WRITE_BACK_STAGE port map(MWB_OUT(106 downto 75),MWB_OUT(74 downto 43),MWB_OUT(42 downto 11),MWB_OUT(4 downto 0),MWB_OUT(10 downto 8),MWB_OUT(7 downto 5),
@@ -127,7 +127,7 @@ begin
 
 	---------- "000"(143 downto 141) + FETCH_DONE(140) + PC_DONE(139) + PC(138 downto 107) + MEM_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8) + Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
-	MWB: entity work.Reg generic map(144) port map(CLK, RST, FETCH_DONE, MWB_IN, MWB_OUT);
+	MWB: entity work.Reg generic map(144) port map(CLK, RST, MEMORY_DONE, MWB_IN, MWB_OUT);
 
 
 
