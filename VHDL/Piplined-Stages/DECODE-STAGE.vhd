@@ -95,8 +95,11 @@ begin
 		"00000";
 		
 	ext <=	std_logic_vector(resize(signed(ir(15 downto 0)), 32))  when 		--Immediate
-			(ir(31 downto 29) = "011" and ((ir(28) or ir(27))='1')) or	--IADD - SHL - SHR
+			(ir(31 downto 29) = "011" and ((ir(28) or ir(27))='1')) else	--IADD - SHL - SHR
+
+			std_logic_vector(resize(unsigned(ir(15 downto 0)), 32)) when 
 			ir(31 downto 27) = "10111"	else				--LDM
+
 		std_logic_vector(resize(signed(ir(19 downto 0)), 32))  when			--EA 
 			ir(31 downto 27) = "10101" or ir(31 downto 27) = "10110" else	--STD - LDD
 		zero;
