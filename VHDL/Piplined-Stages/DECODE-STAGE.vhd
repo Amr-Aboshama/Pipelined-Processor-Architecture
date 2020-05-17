@@ -88,7 +88,7 @@ begin
 				  ir(29 downto 27) /= "100" )	else	--AND - OR - ADD - SUB - IADD - SHL - SHR
 		"00100" when	ir(31 downto 27) = "10001" or		--POP
 				ir(31 downto 27) = "10110"	else	--LDD
-		"00001" when	ir(31 downto 27) = "10111"	else	--LDM
+		"00101" when	ir(31 downto 27) = "10111"	else	--LDM
 		"01000" when	ir(31 downto 27) = "11000"	else	--JZ
 		"11000" when	ir(31 downto 30) = "11" and 
 				ir(29 downto 27) /= "000"	else	--JMP - CALL - RET - RTI
