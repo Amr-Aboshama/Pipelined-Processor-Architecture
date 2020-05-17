@@ -38,8 +38,10 @@ BEGIN
     
     WRITE_REG <= NOT STALL_REG;
 
-    MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR ENABLE ='0' OR MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1'
-                    ELSE '1';
+    -- MEM_RD_ENABLE <= '0' WHEN MEM_RD_DONE='1' OR ENABLE ='0' OR MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1'
+    --                 ELSE '1';
+
+    MEM_RD_ENABLE <= '1';
 
     HAVE_SRC2 <= '1' WHEN   OPCODE(4 DOWNTO 2) = "010"
                         ELSE '0';
@@ -51,13 +53,14 @@ BEGIN
                         ELSE '0';
 
 
-    MAIN: PROCESS( CLK, RST, INT )
+    MAIN: PROCESS( CLK, RST, INT, MEM_RD_DONE)
     
         VARIABLE COUNTER: INTEGER;
         VARIABLE CHANGE_PC_LATCH: STD_LOGIC := '0';
         VARIABLE CHANGE_FLAG_LATCH: INTEGER := 0;
         VARIABLE NEW_PC_REG: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
         VARIABLE FLAG_OUT_REG:  STD_LOGIC_VECTOR(2 DOWNTO 0);
+        VARIABLE TMP:   UNSIGNED(31 DOWNTO 0);
     BEGIN
 
         
@@ -81,10 +84,17 @@ BEGIN
                 OPCODE <= (OTHERS=>'0');
                 FLAG_OUT <= (OTHERS=>'0');
 
-                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
+                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE = '1') THEN
+                    IF(COUNTER=0)   THEN
+                        PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
+                    ELSIF (COUNTER=1)   THEN
+                        PC(15 DOWNTO 0) <= MEM_DATA;
+                    END IF;
+                END IF;
+
+                IF(RISING_EDGE(MEM_RD_DONE)) THEN
                     IF(COUNTER=0)   THEN
                         COUNTER := 1;
-                        PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
                         
                         IF(RST='1') THEN    MEM_ADD <= TO_UNSIGNED(1,ADDRESS_WIDTH);
                         ELSIF(INT='1') THEN   MEM_ADD <= TO_UNSIGNED(3,ADDRESS_WIDTH);
@@ -102,22 +112,17 @@ BEGIN
             ELSE
 
                 --TODO: LOGIC OF PC HERE
+                IF(RISING_EDGE(CLK))    THEN
+                  STALL_REG <= '1';
+                END IF;
 
-
-                MEM_ADD <= PC(ADDRESS_WIDTH-1 DOWNTO 0); 
-
-                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE='1') THEN
-                    STALL_REG <= '1';
+                IF(RISING_EDGE(MEM_RD_DONE))    THEN
                     IF(COUNTER=0)   THEN
-                        COUNTER := 1;
-                        INST2 <= MEM_DATA;
-                        OPCODE <= MEM_DATA(INST_WIDTH-1 DOWNTO INST_WIDTH-5);
-                        PC <= PC + TO_UNSIGNED(1,DATA_WIDTH);
+                        TMP := PC + TO_UNSIGNED(1,DATA_WIDTH);
+                        PC <= TMP;
+                        MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
                     
                     ELSIF(COUNTER=1)    THEN
-                        COUNTER := 0;
-                        INST1 <= MEM_DATA;
-                        STALL_REG <= '0';
                         FLAG_OUT(3) <= '0';
                         IF(CHANGE_PC_LATCH='1') THEN
                             IF(CHANGE_FLAG_LATCH = 1) THEN
@@ -127,15 +132,69 @@ BEGIN
                                 CHANGE_FLAG_LATCH := 0;
                                 FLAG_OUT <= '1' & FLAG_OUT_REG(2 DOWNTO 0);
                             END IF;
-                            PC <= NEW_PC_REG;
+                            
+                            TMP := NEW_PC_REG;
+                            PC <= TMP;
+                            MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
                             CHANGE_PC_LATCH := '0';
-                            COUNTER:=0;
                         ELSE
-                            PC <= PC + TO_UNSIGNED(1,DATA_WIDTH);
+                            TMP := PC + TO_UNSIGNED(1,DATA_WIDTH);
+                            PC <= TMP;
+                            MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
                         END IF;
                     END IF;
+                END IF;
+
+                IF(FALLING_EDGE(CLK) AND MEM_RD_DONE = '1') THEN
+                    IF(COUNTER=0)   THEN
+                        COUNTER := 1;
+                        INST2 <= MEM_DATA;
+                        OPCODE <= MEM_DATA(INST_WIDTH-1 DOWNTO INST_WIDTH-5);
                     
-                END IF;                
+                    ELSIF(COUNTER=1)    THEN
+                        COUNTER := 0;
+                        INST1 <= MEM_DATA;
+                        STALL_REG <= '0';
+                    END IF;
+                END IF;
+
+                -- IF(RISING_EDGE(MEM_RD_DONE)) THEN
+                    -- STALL_REG <= '1';
+                    -- IF(COUNTER=0)   THEN
+                    --     COUNTER := 1;
+                    --     INST2 <= MEM_DATA;
+                    --     OPCODE <= MEM_DATA(INST_WIDTH-1 DOWNTO INST_WIDTH-5);
+                        -- TMP := PC + TO_UNSIGNED(1,DATA_WIDTH);
+                        -- PC <= TMP;
+                        -- MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
+                    
+                    -- ELSIF(COUNTER=1)    THEN
+                    --     COUNTER := 0;
+                    --     INST1 <= MEM_DATA;
+                        -- STALL_REG <= '0';
+                        -- FLAG_OUT(3) <= '0';
+                        -- IF(CHANGE_PC_LATCH='1') THEN
+                        --     IF(CHANGE_FLAG_LATCH = 1) THEN
+                        --         CHANGE_FLAG_LATCH := 2;
+
+                        --     ELSIF(CHANGE_FLAG_LATCH = 2)  THEN
+                        --         CHANGE_FLAG_LATCH := 0;
+                        --         FLAG_OUT <= '1' & FLAG_OUT_REG(2 DOWNTO 0);
+                        --     END IF;
+                            
+                        --     TMP := NEW_PC_REG;
+                        --     PC <= TMP;
+                        --     MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
+                        --     CHANGE_PC_LATCH := '0';
+                        --     COUNTER:=0;
+                        -- ELSE
+                        --     TMP := PC + TO_UNSIGNED(1,DATA_WIDTH);
+                        --     PC <= TMP;
+                        --     MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
+                        -- END IF;
+                    -- END IF;
+                    
+                -- END IF;                
 
                 IF(MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1')   THEN
                     IF(CHANGE_FLAG = '1')   THEN
