@@ -55,28 +55,38 @@ BEGIN
 
     MAIN: PROCESS( CLK, RST, INT, MEM_RD_DONE)
     
-        VARIABLE COUNTER: INTEGER;
+        VARIABLE COUNTER: INTEGER := 0;
         VARIABLE CHANGE_PC_LATCH: INTEGER := 0;
         VARIABLE CHANGE_FLAG_LATCH: INTEGER := 0;
         VARIABLE NEW_PC_REG: UNSIGNED(DATA_WIDTH-1 DOWNTO 0) := (OTHERS=>'0');
         VARIABLE FLAG_OUT_REG:  STD_LOGIC_VECTOR(2 DOWNTO 0);
         VARIABLE TMP:   UNSIGNED(31 DOWNTO 0);
+        VARIABLE RST_LATCH: STD_LOGIC := '0';
+        VARIABLE INT_LATCH: INTEGER := 0;
     BEGIN
 
         
-        IF(RST'EVENT)   THEN
-            COUNTER := 0;
-        END IF;
+        -- IF(RST'EVENT)   THEN
+        --     COUNTER := 0;
+        -- END IF;
 
         IF(RST'EVENT AND RST='1') THEN
+            RST_LATCH := '1';
             MEM_ADD <= TO_UNSIGNED(0,ADDRESS_WIDTH);
-        ELSIF(INT='1' AND STALL_REG='0') THEN
+        ELSIF(INT = '1') THEN
+            INT_LATCH := 1;
+        END IF;
+
+        IF(INT_LATCH = 2)    THEN
             MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
+        
+        ELSIF(INT_LATCH = 3 AND RISING_EDGE(CLK))   THEN
+            INT_LATCH := 4;
         END IF;
 
         IF(ENABLE='1')  THEN
 
-            IF(RST='1' OR (INT='1' AND STALL_REG='0')) THEN
+            IF(RST_LATCH = '1' OR INT_LATCH = 4) THEN
                 STALL_REG <= '1';
                 
                 INST1 <= (OTHERS=>'0');
@@ -84,11 +94,17 @@ BEGIN
                 OPCODE <= (OTHERS=>'0');
                 FLAG_OUT <= (OTHERS=>'0');
 
+                IF(COUNTER = 2) THEN
+                    RST_LATCH := '0';
+                    INT_LATCH := 0;          
+                    COUNTER := 0;
+                END IF;
+
                 IF(FALLING_EDGE(CLK) AND MEM_RD_DONE = '1') THEN
                     IF(COUNTER=0)   THEN
                         PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
-                    ELSIF (COUNTER=1)   THEN
-                        PC(15 DOWNTO 0) <= MEM_DATA;
+                    -- ELSIF (COUNTER=1)   THEN
+                    --     PC(15 DOWNTO 0) <= MEM_DATA;
                     END IF;
                 END IF;
 
@@ -96,15 +112,15 @@ BEGIN
                     IF(COUNTER=0)   THEN
                         COUNTER := 1;
                         
-                        IF(RST='1') THEN    MEM_ADD <= TO_UNSIGNED(1,ADDRESS_WIDTH);
-                        ELSIF(INT='1') THEN   MEM_ADD <= TO_UNSIGNED(3,ADDRESS_WIDTH);
+                        IF(RST_LATCH = '1') THEN    MEM_ADD <= TO_UNSIGNED(1,ADDRESS_WIDTH);
+                        ELSIF(INT_LATCH = 4) THEN   MEM_ADD <= TO_UNSIGNED(3,ADDRESS_WIDTH);
                         END IF;
 
                     ELSIF (COUNTER=1)   THEN
                         COUNTER := 2;
                         PC(15 DOWNTO 0) <= MEM_DATA;
                         MEM_ADD <= MEM_DATA(ADDRESS_WIDTH-1 DOWNTO 0);
-
+                        -- RST_LATCH := '0';
                     END IF;
 
                 END IF;
@@ -113,7 +129,10 @@ BEGIN
 
                 --TODO: LOGIC OF PC HERE
                 IF(RISING_EDGE(CLK))    THEN
-                  STALL_REG <= '1';
+                    IF(INT_LATCH = 2 AND STALL_REG = '0')   THEN
+                        INT_LATCH := 3;
+                    END IF;
+                    STALL_REG <= '1';
                 END IF;
 
                 IF(RISING_EDGE(MEM_RD_DONE))    THEN
@@ -123,6 +142,11 @@ BEGIN
                         MEM_ADD <= TMP(ADDRESS_WIDTH-1 DOWNTO 0);
                     
                     ELSIF(COUNTER=1)    THEN
+                        IF(INT_LATCH = 1)   THEN
+                            INT_LATCH := 2;
+                        END IF;
+
+                        
                         FLAG_OUT(3) <= '0';
                         IF(CHANGE_PC_LATCH=1) THEN
                             IF(CHANGE_FLAG_LATCH = 1) THEN
@@ -158,6 +182,9 @@ BEGIN
                         COUNTER := 0;
                         INST1 <= MEM_DATA;
                         STALL_REG <= '0';
+                        IF(INT_LATCH = 2)   THEN
+                            INT_LATCH := 3;
+                        END IF;
                     END IF;
                 END IF;
 
