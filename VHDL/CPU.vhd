@@ -26,8 +26,10 @@ architecture CPU_ARCH of CPU is
 	signal INST2, INST1: 								unsigned(15 downto 0);
 	signal HAVE_SRC1, HAVE_SRC2:						std_logic;
 	-- signal MEMORY_CHANGE_PC:							std_logic;
-	signal PC:								unsigned(31 downto 0);
+	signal PC:											unsigned(31 downto 0);
 	signal FETCH_FR:									std_logic_vector(3 downto 0);
+	SIGNAL MEMORY_PC_IN:								STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL PC_IN_DONE:									STD_LOGIC;
 
 	-----------> DECODE Signals <-------------
 	signal hazard_detected:					std_logic;
@@ -76,7 +78,8 @@ begin
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
-														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_PC_DONE, BRANCH_CHANGE_PC, unsigned(MEMORY_PC_OUT), unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
+														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_PC_DONE, BRANCH_CHANGE_PC, unsigned(MEMORY_PC_OUT), unsigned(Rsrc1), 
+														MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR, PC_IN_DONE, MEMORY_PC_IN);
 	
 	FD_IN <=  FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & FETCH_DONE & '0');
 
@@ -99,7 +102,7 @@ begin
 	
 	-------------------------------------------> MEMORY_STAGE <--------------------------------------------------
 	
-	MEMORY: entity work.MEMORY_STAGE port map(CLK, RST, INT, EM_OUT(150), FD_OUT(67 downto 36), EM_OUT(146 downto 115), EM_OUT(110 downto 79), EM_OUT(78 downto 47),
+	MEMORY: entity work.MEMORY_STAGE port map(CLK, RST, INT, EM_OUT(150), PC_IN_DONE, MEMORY_PC_IN, EM_OUT(146 downto 115), EM_OUT(110 downto 79), EM_OUT(78 downto 47),
 								EM_OUT(8 downto 5), EM_OUT(149 downto 148), EM_OUT(147), EM_OUT(114 downto 111), 
 								DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_DATAOUT,DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE, DATA_MEM_ADD, DATA_MEM_DATAIN, 
 								MEMORY_FLAG_REGISTER, MEMORY_FLAG_DONE, MEMORY_PC_OUT, MEMORY_PC_DONE, MEMORY_RESULT, MEMORY_DONE);
