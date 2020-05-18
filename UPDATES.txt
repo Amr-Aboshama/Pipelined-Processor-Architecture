@@ -19,3 +19,6 @@
 # Data & Control Hzards in changing PC value between MEMORY_STAGE & DECODE_STAGE 
     - Example:  RTI
                 JMP 1
+
+# Flush FETCH_Registers for branch
+# Flush FETCH & DECODE & EXECUTE Registers for return
