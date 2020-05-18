@@ -101,7 +101,7 @@ BEGIN
                 END IF;
 
                 IF(FALLING_EDGE(CLK) AND MEM_RD_DONE = '1') THEN
-                    IF(COUNTER=0)   THEN
+                    IF(COUNTER=1)   THEN
                         PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
                     -- ELSIF (COUNTER=1)   THEN
                     --     PC(15 DOWNTO 0) <= MEM_DATA;
@@ -111,6 +111,7 @@ BEGIN
                 IF(RISING_EDGE(MEM_RD_DONE)) THEN
                     IF(COUNTER=0)   THEN
                         COUNTER := 1;
+                        -- PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
                         
                         IF(RST_LATCH = '1') THEN    MEM_ADD <= TO_UNSIGNED(1,ADDRESS_WIDTH);
                         ELSIF(INT_LATCH = 4) THEN   MEM_ADD <= TO_UNSIGNED(3,ADDRESS_WIDTH);
