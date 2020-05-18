@@ -25,8 +25,8 @@ architecture CPU_ARCH of CPU is
 	signal INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, TMP:	std_logic;
 	signal INST2, INST1: 								unsigned(15 downto 0);
 	signal HAVE_SRC1, HAVE_SRC2:						std_logic;
-	signal MEMORY_CHANGE_PC:							std_logic;
-	signal PC, MEMORY_PC:								unsigned(31 downto 0);
+	-- signal MEMORY_CHANGE_PC:							std_logic;
+	signal PC:								unsigned(31 downto 0);
 	signal FETCH_FR:									std_logic_vector(3 downto 0);
 
 	-----------> DECODE Signals <-------------
@@ -76,7 +76,7 @@ begin
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
-														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_CHANGE_PC, BRANCH_CHANGE_PC, MEMORY_PC, unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
+														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_PC_DONE, BRANCH_CHANGE_PC, unsigned(MEMORY_PC_OUT), unsigned(Rsrc1), MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR);
 	
 	FD_IN <=  FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & FETCH_DONE & '0');
 
