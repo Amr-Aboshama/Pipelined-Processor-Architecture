@@ -48,6 +48,8 @@ architecture decode of decode_stage is
 	signal R0_in,R1_in,R2_in,R3_in,R4_in,R5_in,R6_in,R7_in: std_logic_vector(31 downto 0);
 	signal en0,en1,en2,en3,en4,en5,en6,en7: std_logic;
 
+	SIGNAL NOT_CLK:	STD_LOGIC;
+
 	constant ZERO : std_logic_vector(31 downto 0) := (others => '0');
 begin
 
@@ -115,14 +117,15 @@ begin
 				'0';
 
 ---------------------------------- Register File -----------------------------------------------------------
-	u0: entity work.Reg port map(clk,rst,en0,R0_in,R0);
-	u1: entity work.Reg port map(clk,rst,en1,R1_in,R1);
-	u2: entity work.Reg port map(clk,rst,en2,R2_in,R2);
-	u3: entity work.Reg port map(clk,rst,en3,R3_in,R3);
-	u4: entity work.Reg port map(clk,rst,en4,R4_in,R4);
-	u5: entity work.Reg port map(clk,rst,en5,R5_in,R5);
-	u6: entity work.Reg port map(clk,rst,en6,R6_in,R6);
-	u7: entity work.Reg port map(clk,rst,en7,R7_in,R7);
+	NOT_CLK <= NOT clk;
+	u0: entity work.Reg port map(NOT_CLK,rst,en0,R0_in,R0);
+	u1: entity work.Reg port map(NOT_CLK,rst,en1,R1_in,R1);
+	u2: entity work.Reg port map(NOT_CLK,rst,en2,R2_in,R2);
+	u3: entity work.Reg port map(NOT_CLK,rst,en3,R3_in,R3);
+	u4: entity work.Reg port map(NOT_CLK,rst,en4,R4_in,R4);
+	u5: entity work.Reg port map(NOT_CLK,rst,en5,R5_in,R5);
+	u6: entity work.Reg port map(NOT_CLK,rst,en6,R6_in,R6);
+	u7: entity work.Reg port map(NOT_CLK,rst,en7,R7_in,R7);
 
 
 	Rdst_num  <= ir(26 downto 24);
