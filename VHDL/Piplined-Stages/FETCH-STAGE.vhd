@@ -77,11 +77,30 @@ BEGIN
             INT_LATCH := 1;
         END IF;
 
-        IF(INT_LATCH = 2)    THEN
-            MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
-        
-        ELSIF(INT_LATCH = 3 AND RISING_EDGE(CLK))   THEN
+        IF(INT_LATCH = 3 AND RISING_EDGE(CLK))   THEN
             INT_LATCH := 4;
+        END IF;
+
+        
+        IF((MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1') AND CHANGE_PC_LATCH = 0)   THEN
+            CHANGE_PC_LATCH := 1;
+        END IF;
+
+        IF(CHANGE_PC_LATCH = 1) THEN
+            IF(MEMORY_CHANGE_PC = '1') THEN
+                NEW_PC_REG := MEMORY_PC;
+            ELSIF(BRANCH_CHANGE_PC = '1')   THEN
+                NEW_PC_REG := BRANCH_PC;
+        END IF;
+
+        END IF;
+
+        IF(CHANGE_FLAG = '1' AND CHANGE_FLAG_LATCH = 0)   THEN
+            CHANGE_FLAG_LATCH := 1;
+        END IF;
+
+        IF(CHANGE_FLAG_LATCH = 1)   THEN
+            FLAG_OUT_REG := FLAG_IN(2 DOWNTO 0);
         END IF;
 
         IF(ENABLE='1')  THEN
@@ -101,7 +120,7 @@ BEGIN
                 END IF;
 
                 IF(FALLING_EDGE(CLK) AND MEM_RD_DONE = '1') THEN
-                    IF(COUNTER=1)   THEN
+                    IF((COUNTER=1 AND RST_LATCH = '1') OR (COUNTER=0 AND INT_LATCH = 4))   THEN
                         PC(DATA_WIDTH-1 DOWNTO 16) <= MEM_DATA;
                     -- ELSIF (COUNTER=1)   THEN
                     --     PC(15 DOWNTO 0) <= MEM_DATA;
@@ -225,28 +244,11 @@ BEGIN
                         -- END IF;
                     -- END IF;
                     
-                -- END IF;                
-                
-                IF((MEMORY_CHANGE_PC = '1' OR BRANCH_CHANGE_PC = '1') AND CHANGE_PC_LATCH = 0)   THEN
-                    CHANGE_PC_LATCH := 1;
-                END IF;
+                -- END IF;  
 
-                IF(CHANGE_PC_LATCH = 1) THEN
-                    IF(MEMORY_CHANGE_PC = '1') THEN
-                        NEW_PC_REG := MEMORY_PC;
-                    ELSIF(BRANCH_CHANGE_PC = '1')   THEN
-                        NEW_PC_REG := BRANCH_PC;
-                END IF;
-
-                END IF;
-
-                IF(CHANGE_FLAG = '1' AND CHANGE_FLAG_LATCH = 0)   THEN
-                    CHANGE_FLAG_LATCH := 1;
-                END IF;
-
-                IF(CHANGE_FLAG_LATCH = 1)   THEN
-                    FLAG_OUT_REG := FLAG_IN(2 DOWNTO 0);
-                END IF;
+                IF(INT_LATCH = 2)    THEN
+                    MEM_ADD <= TO_UNSIGNED(2,ADDRESS_WIDTH);
+                END IF; 
 
             END IF;
                 
