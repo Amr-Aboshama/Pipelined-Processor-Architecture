@@ -45,6 +45,7 @@ architecture CPU_ARCH of CPU is
 	signal RDST1_NUM, RDST2_NUM:		std_logic_vector(2 downto 0);
 	signal FLAG_REG:					std_logic_vector(3 downto 0);
 	signal EX_RESULT1, EX_RESULT2:		std_logic_vector(31 downto 0);
+	signal FORWARD_OUT1, FORWARD_OUT2:	std_logic_vector(31 downto 0) ;
 
 	-----------> MEMORY Signals <--------------
 	SIGNAL DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE:	STD_LOGIC;
@@ -92,7 +93,7 @@ begin
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
-	EXECUTE: entity work.EXECUTE_STAGE port map(DE_OUT(159 DOWNTO 156), DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(119 downto 88),
+	EXECUTE: entity work.EXECUTE_STAGE port map(DE_OUT(159 DOWNTO 156), FORWARD_OUT1, FORWARD_OUT2, DE_OUT(119 downto 88),
 												DE_OUT(23 downto 21), DE_OUT(20 downto 18), DE_OUT(17 downto 15),
 												DE_OUT(4 downto 0), DE_OUT(14 downto 9), RST, INT, DE_OUT(152), INPUT_PORT,
 												OUTPUT_PORT, RDST1_NUM, RDST2_NUM, FLAG_REG, EX_RESULT1, EX_RESULT2);
@@ -134,10 +135,17 @@ begin
 
 
 
+	--------------------------------------------------> UNITS <--------------------------------------------------
+
+	FORWRDING:	entity work.FORWARDING_UNIT port map(DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(23 downto 21), DE_OUT(20 downto 18), DE_OUT(1)
+							, EM_OUT(78 downto 47), EM_OUT(46 downto 15), EM_OUT(14 downto 12), EM_OUT(11 downto 9)
+							, EM_OUT(2), EM_OUT(1), EM_OUT(0)
+							, MWB_OUT(106 downto 75), MWB_OUT(74 downto 43), MWB_OUT(42 downto 11), MWB_OUT(10 downto 8), MWB_OUT(7 downto 5)
+							, MWB_OUT(2), MWB_OUT(1), MWB_OUT(0)
+							, FORWARD_OUT1, FORWARD_OUT2);
 
 
-
-	----------------------------------------------------------> SIGNALS <---------------------------------------------------------
+	----------------------------------------------- -> SIGNALS <-------------------------------------------------
 	
 	FETCH_ENABLE <= RST OR INT OR MEMORY_DONE;			
 	DE_ENABLE <= FETCH_DONE;-- OR MEMORY_DONE;

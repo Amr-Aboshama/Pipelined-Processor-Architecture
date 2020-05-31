@@ -7,7 +7,7 @@ entity FORWARDING_UNIT is
             
             SRC1, SRC2: IN std_logic_vector(DATA_WIDTH-1 downto 0) ;   -- DECODE
             RSRCNUM1, RSRCNUM2: IN  std_logic_vector(2 downto 0) ;
-            SWAP_DE:    IN STD_LOGIC;
+            SWAP_DE:    IN STD_LOGIC;   -- WB(1)
 
             EX1, EX2: IN  std_logic_vector(DATA_WIDTH-1 downto 0) ;      -- EXECUTE
             RDSTNUM1_EX, RDSTNUM2_EX:   IN  std_logic_vector(2 downto 0) ;
@@ -15,7 +15,7 @@ entity FORWARDING_UNIT is
             SWAP_EX:  IN  STD_LOGIC ;   -- WB(1)
             ALU_EX:  IN  STD_LOGIC ;    -- WB(0)
             
-            ALU_RES, MEM_RES, RES: IN  std_logic_vector(DATA_WIDTH-1 downto 0) ;   -- MEMORY
+            MEM_RES, ALU_RES, RES: IN  std_logic_vector(DATA_WIDTH-1 downto 0) ;   -- MEMORY
             RDSTNUM1_MEM, RDSTNUM2_MEM:   IN  std_logic_vector(2 downto 0) ;
             WRITE_MEM:  IN  STD_LOGIC ;  -- WB(2)
             SWAP_MEM:  IN  STD_LOGIC ;   -- WB(1)
