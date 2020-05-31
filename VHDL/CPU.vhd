@@ -12,7 +12,7 @@ end CPU;
 
 architecture CPU_ARCH of CPU is
 	-----------> Intermediate Registers Signals <-------------
-	signal DE_ENABLE, EM_ENABLE: 				std_logic;
+	signal DE_ENABLE, EM_ENABLE, MWB_ENABLE:	std_logic;
 	signal FD_IN, FD_OUT: 						std_logic_vector(71 downto 0);
 	signal DE_IN, DE_OUT: 						std_logic_vector(163 downto 0);
 	signal EM_IN, EM_OUT: 						std_logic_vector(151 downto 0);
@@ -45,7 +45,6 @@ architecture CPU_ARCH of CPU is
 	signal RDST1_NUM, RDST2_NUM:		std_logic_vector(2 downto 0);
 	signal FLAG_REG:					std_logic_vector(3 downto 0);
 	signal EX_RESULT1, EX_RESULT2:		std_logic_vector(31 downto 0);
-	signal FORWARD_OUT1, FORWARD_OUT2:	std_logic_vector(31 downto 0) ;
 
 	-----------> MEMORY Signals <--------------
 	SIGNAL DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE:	STD_LOGIC;
@@ -63,6 +62,15 @@ architecture CPU_ARCH of CPU is
 	signal dst1_result,dst2_result, mem_result:			std_logic_vector(31 downto 0);
 	signal dst1_en,dst2_en: 							std_logic;
 	signal dst1_num,dst2_num,dst1_num_fr,dst2_num_fr:	std_logic_vector(2 downto 0);
+
+	-------------> FORWADING_UNIT SIGNALS <-------------
+	signal FORWARD_OUT1, FORWARD_OUT2:	std_logic_vector(31 downto 0) ;
+	
+	---------> HAZARD_DETECTION_UNIT SIGNALS <---------
+	signal EX_SIGNALS:	std_logic_vector(5 downto 0) ;
+	signal MEM_SIGNALS:	std_logic_vector(6 downto 0) ;
+	signal WB_SIGNALS:	std_logic_vector(4 downto 0) ;
+	signal LD_STALL:	STD_LOGIC;
 begin
 
 	--------------------------------------> Instruction Memory <-----------------------------------------------
@@ -89,7 +97,7 @@ begin
 	DECODE:	entity work.DECODE_STAGE port map(CLK, RST,FD_OUT(67 downto 36),FD_OUT(35 downto 4),dst1_result,dst2_result,dst1_num,dst2_num,dst1_en,dst2_en,hazard_detected,intr,FLAG_REG,
 						  ext,Rsrc2,Rsrc1,BRANCH_CHANGE_PC,jz,Rsrc1_num,Rsrc2_num,Rdst_num,m_to_DE,wb_to_DE,ex_to_DE);
 
-	DE_IN <= std_logic_vector( "000" & FD_OUT(1) & FD_OUT(71 DOWNTO 68) & m_to_DE(2 downto 0) & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & ex_to_DE & m_to_DE(6 downto 3) & wb_to_DE);
+	DE_IN <= std_logic_vector( "000" & FD_OUT(1) & FD_OUT(71 DOWNTO 68) & MEM_SIGNALS(2 downto 0) & jz & FD_OUT(67 downto 36) & ext & Rsrc1 & Rsrc2 & Rsrc1_num & Rsrc2_num & Rdst_num & EX_SIGNALS & MEM_SIGNALS(6 downto 3) & WB_SIGNALS);
 
 	------------------------------------------> EXECUTE_STAGE <--------------------------------------------------
 
@@ -131,7 +139,7 @@ begin
 
 	---------- "000"(143 downto 141) + FETCH_DONE(140) + PC_DONE(139) + PC(138 downto 107) + MEMORY_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8) + Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
-	MWB: entity work.Reg generic map(144) port map(CLK, RST, FETCH_DONE, MWB_IN, MWB_OUT);
+	MWB: entity work.Reg generic map(144) port map(CLK, RST, MWB_ENABLE, MWB_IN, MWB_OUT);
 
 
 
@@ -144,12 +152,17 @@ begin
 							, MWB_OUT(2), MWB_OUT(1), MWB_OUT(0)
 							, FORWARD_OUT1, FORWARD_OUT2);
 
+	HAZARD_DETECTION:	entity work.HAZARD_DETECTION_UNIT port map(DE_OUT(8), DE_OUT(4), DE_OUT(17 downto 15)
+							, FD_OUT(3), FD_OUT(2), Rsrc1_num, Rsrc2_num
+							, ex_to_DE, m_to_DE, wb_to_DE
+							, EX_SIGNALS, MEM_SIGNALS, WB_SIGNALS, LD_STALL);
 
 	----------------------------------------------- -> SIGNALS <-------------------------------------------------
 	
-	FETCH_ENABLE <= RST OR INT OR MEMORY_DONE;			
-	DE_ENABLE <= FETCH_DONE;-- OR MEMORY_DONE;
-	EM_ENABLE <= FETCH_DONE;-- OR MEMORY_DONE;
+	FETCH_ENABLE <= (RST OR INT OR MEMORY_DONE) AND (NOT LD_STALL);			
+	DE_ENABLE <= FETCH_DONE OR LD_STALL;-- OR MEMORY_DONE;
+	EM_ENABLE <= FETCH_DONE OR LD_STALL;-- OR MEMORY_DONE;
+	MWB_ENABLE <= FETCH_DONE OR LD_STALL;
 	
 	intr <= "00";
 end CPU_ARCH;
