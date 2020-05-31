@@ -22,3 +22,7 @@
 
 # Flush FETCH_Registers for branch
 # Flush FETCH & DECODE & EXECUTE Registers for return
+
+------------------------------------------------------------------- Phase 2
+# FORWADING-UNIT WORKS WITH EX AND MEM ONLY.
+# BRANCH-PREDICTION UNIT USES FORWADING-UNIT OUTPUT IN ADDITION TO THE REGISTER FILE TO BRANCH
