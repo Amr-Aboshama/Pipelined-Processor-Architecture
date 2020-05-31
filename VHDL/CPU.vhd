@@ -137,7 +137,7 @@ begin
 
 	--------------------------------------------------> UNITS <--------------------------------------------------
 
-	FORWRDING:	entity work.FORWARDING_UNIT port map(DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(23 downto 21), DE_OUT(20 downto 18), DE_OUT(1)
+	FORWRDING:	entity work.FORWARDING_UNIT port map(DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(23 downto 21), DE_OUT(20 downto 18)
 							, EM_OUT(78 downto 47), EM_OUT(46 downto 15), EM_OUT(14 downto 12), EM_OUT(11 downto 9)
 							, EM_OUT(2), EM_OUT(1), EM_OUT(0)
 							, MWB_OUT(106 downto 75), MWB_OUT(74 downto 43), MWB_OUT(42 downto 11), MWB_OUT(10 downto 8), MWB_OUT(7 downto 5)
