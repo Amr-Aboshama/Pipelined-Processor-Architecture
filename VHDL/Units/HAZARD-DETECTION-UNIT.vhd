@@ -1,0 +1,9 @@
+LIBRARY IEEE;
+
+USE IEEE.STD_LOGIC_1164.ALL;
+
+entity HAZARD_DETECTION_UNIT is
+    port (
+        
+    ) ;
+end HAZARD_DETECTION_UNIT;
