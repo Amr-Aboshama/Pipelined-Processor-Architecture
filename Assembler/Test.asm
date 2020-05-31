@@ -26,4 +26,12 @@ INC R6
 IADD R6,R7,3
 INC R6 
 
+LDM R6, DD
+INC R6
+
+PUSH R6
+POP R5
+nop
+iadd r5,r7,0
+
 JMP R1
