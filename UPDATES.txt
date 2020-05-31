@@ -26,3 +26,6 @@
 ------------------------------------------------------------------- Phase 2
 # FORWADING-UNIT WORKS WITH EX AND MEM ONLY.
 # BRANCH-PREDICTION UNIT USES FORWADING-UNIT OUTPUT IN ADDITION TO THE REGISTER FILE TO BRANCH
+
+# Load-use case appears in: LDD, POP
+    and can appear in: RET, RTI
