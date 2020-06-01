@@ -70,30 +70,28 @@ begin
         variable HAZARD_LATCH:  INTEGER := 0;
         variable INST_LATCH:  INTEGER := 0;
     begin
-        -- IF(TO_INTEGER(unsigned(INST_FE(67 DOWNTO 36))) = TO_INTEGER(unsigned(INST_DE(151 DOWNTO 120))) + 2 )    THEN
-            IF(HAZARD_EXIST = '1' AND HAZARD_LATCH = 0) THEN
-                HAZARD_LATCH := 1;
-                PC_DONE <= '1';
-                PC_OUT <= std_logic_vector(PC - TO_UNSIGNED(1,32));
-                INST_LATCH := 1;
-                INST_FE_OUT <= INST_FE;
-                INST_DE_OUT <= INST_DE;
-            ELSIF(HAZARD_EXIST = '0' AND HAZARD_LATCH = 1) THEN
-                HAZARD_LATCH := 0;
-                PC_DONE <= '0';
-                -- STALL <= '0';
-            END IF;
+        IF(HAZARD_EXIST = '1' AND HAZARD_LATCH = 0) THEN
+            HAZARD_LATCH := 1;
+            PC_DONE <= '1';
+            PC_OUT <= std_logic_vector(PC - TO_UNSIGNED(1,32));
+            INST_LATCH := 1;
+            INST_FE_OUT <= INST_FE;
+            INST_DE_OUT <= INST_DE;
+        ELSIF(HAZARD_EXIST = '0' AND HAZARD_LATCH = 1) THEN
+            HAZARD_LATCH := 0;
+            PC_DONE <= '0';
+            INST_LATCH := 0;
+            -- STALL <= '0';
+        END IF;
 
-            IF(FETCH_DONE'EVENT) THEN
-                IF(INST_LATCH = 1)  THEN
-                    INST_LATCH := 2;
-                    INST_DONE <= '1';
-                ELSE
-                    INST_DONE <= '0';
-                    INST_LATCH := 0;
-                END IF;
+        IF(FETCH_DONE'EVENT) THEN
+            IF(INST_LATCH = 1)  THEN
+                INST_LATCH := 2;
+                INST_DONE <= '1';
+            ELSE
+                INST_DONE <= '0';
             END IF;
-        -- END IF;
+        END IF;
     END PROCESS;
 
 end HAZARD_DETECTION ; -- HAZARD_DETECTION
