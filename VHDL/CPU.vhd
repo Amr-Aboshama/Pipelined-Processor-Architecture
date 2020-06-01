@@ -12,7 +12,7 @@ end CPU;
 
 architecture CPU_ARCH of CPU is
 	-----------> Intermediate Registers Signals <-------------
-	signal DE_ENABLE, EM_ENABLE, MWB_ENABLE:	std_logic;
+	signal FE_ENABLE, DE_ENABLE, EM_ENABLE, MWB_ENABLE:	std_logic;
 	signal FD_IN, FD_OUT: 						std_logic_vector(71 downto 0);
 	signal DE_IN, DE_OUT: 						std_logic_vector(163 downto 0);
 	signal EM_IN, EM_OUT: 						std_logic_vector(151 downto 0);
@@ -71,6 +71,10 @@ architecture CPU_ARCH of CPU is
 	signal MEM_SIGNALS:	std_logic_vector(6 downto 0) ;
 	signal WB_SIGNALS:	std_logic_vector(4 downto 0) ;
 	signal LD_STALL:	STD_LOGIC;
+	signal STALL_CHANGE_PC, INST_DONE:	std_logic;
+	signal STALL_PC_OUT:	std_logic_vector(31 downto 0) ;
+	signal INST_FE_OUT:	std_logic_vector(71 downto 0) ;
+	signal INST_DE_OUT:	std_logic_vector(163 downto 0) ;
 begin
 
 	--------------------------------------> Instruction Memory <-----------------------------------------------
@@ -87,10 +91,11 @@ begin
 	------------------------------------------> FETCH_STAGE <--------------------------------------------------
 	FETCH:	entity work.FETCH_STAGE generic map(16,32,11) port map(CLK, RST, FETCH_ENABLE, INT, FETCH_DONE, PC, 
 														unsigned(INST_MEM_DATA), INST_MEM_ADD, INST_MEM_RD_DONE, INST_MEM_RD_ENABLE, 
-														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_PC_DONE, BRANCH_CHANGE_PC, unsigned(MEMORY_PC_OUT), unsigned(Rsrc1), 
+														INST1, INST2, HAVE_SRC1, HAVE_SRC2, MEMORY_PC_DONE, BRANCH_CHANGE_PC, STALL_CHANGE_PC, unsigned(MEMORY_PC_OUT), unsigned(Rsrc1), unsigned(STALL_PC_OUT), 
 														MEMORY_FLAG_DONE, MEMORY_FLAG_REGISTER, FETCH_FR, PC_IN_DONE, MEMORY_PC_IN);
 	
-	FD_IN <=  FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & FETCH_DONE & '0');
+	FD_IN <=  FETCH_FR & std_logic_vector(PC & INST2 & INST1 & HAVE_SRC1 & HAVE_SRC2 & FETCH_DONE & '0') WHEN INST_DONE = '0'
+		ELSE INST_FE_OUT;
 
 	------------------------------------------> DECODE_STAGE <--------------------------------------------------
 	-- TODO: ADD GROUP_SEL1 (2 BITS) & GROUP_SEL2 (1 BIT)
@@ -125,7 +130,7 @@ begin
 	---------------------------------------> Intermediate Registers <--------------------------------------------
 	
 	---------- FLAG_REGISTER(71 downto 68) + PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + FETCH_DONE(1) + '0'(0) ---------
-	FD: entity work.Reg generic map(72) port map(CLK, RST, FETCH_DONE, FD_IN, FD_OUT);
+	FD: entity work.Reg generic map(72) port map(CLK, RST, FE_ENABLE, FD_IN, FD_OUT);
 
 	------ "000"(163 downto 161) + FETCH_DONE(160) + FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + JZ(152) + PC(151 downto 120) -------- 
 	----------- EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) + Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
@@ -152,17 +157,20 @@ begin
 							, MWB_OUT(2), MWB_OUT(1), MWB_OUT(0)
 							, FORWARD_OUT1, FORWARD_OUT2);
 
-	HAZARD_DETECTION:	entity work.HAZARD_DETECTION_UNIT port map(DE_OUT(8), DE_OUT(4), DE_OUT(17 downto 15)
-							, FD_OUT(3), FD_OUT(2), Rsrc1_num, Rsrc2_num
+	HAZARD_DETECTION:	entity work.HAZARD_DETECTION_UNIT port map(DE_IN, DE_OUT(8), DE_OUT(4), DE_OUT(17 downto 15)
+							, FD_OUT, FD_OUT(3), FD_OUT(2), Rsrc1_num, Rsrc2_num, PC, FETCH_DONE
 							, ex_to_DE, m_to_DE, wb_to_DE
-							, EX_SIGNALS, MEM_SIGNALS, WB_SIGNALS, LD_STALL);
+							, EX_SIGNALS, MEM_SIGNALS, WB_SIGNALS
+							, STALL_CHANGE_PC, STALL_PC_OUT, LD_STALL
+							, INST_DONE, INST_FE_OUT, INST_DE_OUT);
 
 	----------------------------------------------- -> SIGNALS <-------------------------------------------------
 	
-	FETCH_ENABLE <= (RST OR INT OR MEMORY_DONE) AND (NOT LD_STALL);			
-	DE_ENABLE <= FETCH_DONE OR LD_STALL;-- OR MEMORY_DONE;
-	EM_ENABLE <= FETCH_DONE OR LD_STALL;-- OR MEMORY_DONE;
-	MWB_ENABLE <= FETCH_DONE OR LD_STALL;
+	FETCH_ENABLE <= (RST OR INT OR MEMORY_DONE);
+	FE_ENABLE <= FETCH_DONE; -- AND (NOT LD_STALL);		
+	DE_ENABLE <= FETCH_DONE;-- OR MEMORY_DONE;
+	EM_ENABLE <= FETCH_DONE; -- OR LD_STALL;-- OR MEMORY_DONE;
+	MWB_ENABLE <= FETCH_DONE; -- OR LD_STALL;
 	
 	intr <= "00";
 end CPU_ARCH;
