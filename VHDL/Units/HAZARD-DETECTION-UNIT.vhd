@@ -73,7 +73,7 @@ begin
         IF(HAZARD_EXIST = '1' AND HAZARD_LATCH = 0) THEN
             HAZARD_LATCH := 1;
             PC_DONE <= '1';
-            PC_OUT <= std_logic_vector(PC - TO_UNSIGNED(1,32));
+            PC_OUT <= INST_FE(67 downto 36);
             INST_LATCH := 1;
             INST_FE_OUT <= INST_FE;
             INST_DE_OUT <= INST_DE;
