@@ -9,14 +9,15 @@ entity FLUSHING_UNIT is
         
         -- DE/EX
         BRANCH_EX: IN  STD_LOGIC;          -- WB(3)
+        EXTRAFLUSH_EX:  IN  STD_LOGIC;     -- MEM(6)
         
         -- EX/MEM
         BRANCH_MEM: IN  STD_LOGIC;          -- WB(3)
-        EXTRAFLUSH_MEM:    IN STD_LOGIC;   -- WB
+        EXTRAFLUSH_MEM:    IN STD_LOGIC;   -- MEM(6)
         
         -- MEM/WB
         BRANCH_WB: IN  STD_LOGIC;          -- WB(3)
-        EXTRAFLUSH_WB:    IN STD_LOGIC;   -- WB
+        EXTRAFLUSH_WB:    IN STD_LOGIC;   -- MEM(6)
 
         FLUSH:  OUT STD_LOGIC
     ) ;
@@ -25,6 +26,6 @@ end FLUSHING_UNIT;
 architecture FLUSHING of FLUSHING_UNIT is
 begin
 
-    FLUSH <= BRANCH_CHANGE AND (BRANCH_EX OR (BRANCH_MEM AND EXTRAFLUSH_MEM) OR (BRANCH_WB AND EXTRAFLUSH_WB));
+    FLUSH <= ((BRANCH_CHANGE OR EXTRAFLUSH_EX) AND BRANCH_EX) OR (BRANCH_MEM AND EXTRAFLUSH_MEM);
 
 end FLUSHING ; -- FLUSHING
