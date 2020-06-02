@@ -14,10 +14,6 @@ entity FLUSHING_UNIT is
         -- EX/MEM
         BRANCH_MEM: IN  STD_LOGIC;          -- WB(3)
         EXTRAFLUSH_MEM:    IN STD_LOGIC;   -- MEM(6)
-        
-        -- MEM/WB
-        BRANCH_WB: IN  STD_LOGIC;          -- WB(3)
-        EXTRAFLUSH_WB:    IN STD_LOGIC;   -- MEM(6)
 
         FLUSH:  OUT STD_LOGIC
     ) ;
