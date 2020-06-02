@@ -103,7 +103,7 @@ begin
 	
 	-------------------------------------------> MEMORY_STAGE <--------------------------------------------------
 	
-	MEMORY: entity work.MEMORY_STAGE port map(CLK, RST, INT, EM_OUT(150), PC_IN_DONE, MEMORY_PC_IN, EM_OUT(146 downto 115), EM_OUT(110 downto 79), EM_OUT(78 downto 47),
+	MEMORY: entity work.MEMORY_STAGE port map(CLK, RST, INT, EM_OUT(150), FETCH_DONE, PC_IN_DONE, MEMORY_PC_IN, EM_OUT(146 downto 115), EM_OUT(110 downto 79), EM_OUT(78 downto 47),
 								EM_OUT(8 downto 5), EM_OUT(149 downto 148), EM_OUT(147), EM_OUT(114 downto 111), 
 								DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_DATAOUT,DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE, DATA_MEM_ADD, DATA_MEM_DATAIN, 
 								MEMORY_FLAG_REGISTER, MEMORY_FLAG_DONE, MEMORY_PC_OUT, MEMORY_PC_DONE, MEMORY_RESULT, MEMORY_DONE);
