@@ -13,6 +13,7 @@ end CPU;
 architecture CPU_ARCH of CPU is
 	-----------> Intermediate Registers Signals <-------------
 	signal FE_ENABLE, DE_ENABLE, EM_ENABLE, MWB_ENABLE:	std_logic;
+	signal FE_RST:								std_logic;
 	signal FD_IN, FD_OUT: 						std_logic_vector(71 downto 0);
 	signal DE_IN, DE_OUT: 						std_logic_vector(163 downto 0);
 	signal EM_IN, EM_OUT: 						std_logic_vector(151 downto 0);
@@ -75,6 +76,10 @@ architecture CPU_ARCH of CPU is
 	signal STALL_PC_OUT:	std_logic_vector(31 downto 0) ;
 	signal INST_FE_OUT:	std_logic_vector(71 downto 0) ;
 	signal INST_DE_OUT:	std_logic_vector(163 downto 0) ;
+
+	-------------> FLUSHING_UNIT SIGNALS <-------------
+	signal FLUSH:	std_logic;
+
 begin
 
 	--------------------------------------> Instruction Memory <-----------------------------------------------
@@ -121,7 +126,7 @@ begin
 								DATA_MEM_RD_DONE, DATA_MEM_WRT_DONE, DATA_MEM_DATAOUT,DATA_MEM_RD_ENABLE, DATA_MEM_WRT_ENABLE, DATA_MEM_ADD, DATA_MEM_DATAIN, 
 								MEMORY_FLAG_REGISTER, MEMORY_FLAG_DONE, MEMORY_PC_OUT, MEMORY_PC_DONE, MEMORY_RESULT, MEMORY_DONE);
 
-	MWB_IN <= STD_LOGIC_VECTOR( "000" & EM_OUT(150	) & MEMORY_PC_DONE & MEMORY_PC_OUT & MEMORY_RESULT & EM_OUT(78 DOWNTO 9) & EM_OUT(4 DOWNTO 0) );
+	MWB_IN <= STD_LOGIC_VECTOR( "00" & EM_OUT(8) & EM_OUT(150) & MEMORY_PC_DONE & MEMORY_PC_OUT & MEMORY_RESULT & EM_OUT(78 DOWNTO 9) & EM_OUT(4 DOWNTO 0) );
 
 	------------------------------------------> WRITEBACK_STAGE <------------------------------------------------
 	WRITEBACK: entity work.WRITE_BACK_STAGE port map(MWB_OUT(106 downto 75),MWB_OUT(74 downto 43),MWB_OUT(42 downto 11),MWB_OUT(4 downto 0),MWB_OUT(10 downto 8),MWB_OUT(7 downto 5),
@@ -130,7 +135,7 @@ begin
 	---------------------------------------> Intermediate Registers <--------------------------------------------
 	
 	---------- FLAG_REGISTER(71 downto 68) + PC(67 downto 36) + IR(35 downto 4) + src_exist(3 downto 2) + FETCH_DONE(1) + '0'(0) ---------
-	FD: entity work.Reg generic map(72) port map(CLK, RST, FE_ENABLE, FD_IN, FD_OUT);
+	FD: entity work.Reg generic map(72) port map(CLK, FE_RST, FE_ENABLE, FD_IN, FD_OUT);
 
 	------ "000"(163 downto 161) + FETCH_DONE(160) + FLAG_REGISTER(159 DOWNTO 156) + GROUP1SELECTOR(155 downto 154) + GROUP2SELECTOR(153) + JZ(152) + PC(151 downto 120) -------- 
 	----------- EXT(119 downto 88) + Rsrc1(87 downto 56) + Rsrc2(55 downto 24) + Rsrc1_num(23 downto 21) + Rsrc2_num(20 downto 18) + Rdst_num(17 downto 15) ------------
@@ -142,7 +147,7 @@ begin
 	------------------------------------------ M(8 downto 5) + WB(4 downto 0) -------------------------------------------
 	EM: entity work.Reg generic map(152) port map(CLK, RST, EM_ENABLE, EM_IN, EM_OUT);
 
-	---------- "000"(143 downto 141) + FETCH_DONE(140) + PC_DONE(139) + PC(138 downto 107) + MEMORY_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
+	---------- "00"(143 downto 142) + RD_MEMORY(141) + FETCH_DONE(140) + PC_DONE(139) + PC(138 downto 107) + MEMORY_RESULT(106 downto 75) + ALU_RESULT(74 downto 43) + RESULT(42 downto 11) ---------
 	---------------------------- Rdst1_Num(10 downto 8) + Rdst2_Num(7 downto 5) + WB(4 downto 0) -------------------------
 	MWB: entity work.Reg generic map(144) port map(CLK, RST, MWB_ENABLE, MWB_IN, MWB_OUT);
 
@@ -164,6 +169,8 @@ begin
 							, STALL_CHANGE_PC, STALL_PC_OUT, LD_STALL
 							, INST_DONE, INST_FE_OUT, INST_DE_OUT);
 
+	FLUSHING:	entity work.FLUSHING_UNIT port map(FD_OUT(1), DE_OUT(3),EM_OUT(3),EM_OUT(8),MWB_OUT(3),MWB_OUT(141),FLUSH);
+
 	----------------------------------------------- -> SIGNALS <-------------------------------------------------
 	
 	FETCH_ENABLE <= (RST OR INT OR MEMORY_DONE);
@@ -171,6 +178,8 @@ begin
 	DE_ENABLE <= FETCH_DONE;-- OR MEMORY_DONE;
 	EM_ENABLE <= FETCH_DONE; -- OR LD_STALL;-- OR MEMORY_DONE;
 	MWB_ENABLE <= FETCH_DONE; -- OR LD_STALL;
+
+	FE_RST <= RST OR FLUSH;
 	
 	intr <= "00";
 end CPU_ARCH;
