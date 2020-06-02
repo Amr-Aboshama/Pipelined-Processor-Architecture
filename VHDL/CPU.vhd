@@ -169,7 +169,7 @@ begin
 							, STALL_CHANGE_PC, STALL_PC_OUT, LD_STALL
 							, INST_DONE, INST_FE_OUT, INST_DE_OUT);
 
-	FLUSHING:	entity work.FLUSHING_UNIT port map(FD_OUT(1), DE_OUT(3),EM_OUT(3),EM_OUT(8),MWB_OUT(3),MWB_OUT(141),FLUSH);
+	FLUSHING:	entity work.FLUSHING_UNIT port map(BRANCH_CHANGE_PC, DE_OUT(3),EM_OUT(3),EM_OUT(8),MWB_OUT(3),MWB_OUT(141),FLUSH);
 
 	----------------------------------------------- -> SIGNALS <-------------------------------------------------
 	
