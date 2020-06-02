@@ -146,7 +146,7 @@ begin
 							, FORWARD_EX_OUT1, FORWARD_EX_OUT2);
 
 	BRANCH_FORWRDING:	entity work.BRANCH_FORWARDING_UNIT port map(Rsrc1, Rsrc1_num
-							, DE_OUT(87 downto 56), DE_OUT(55 downto 24), DE_OUT(23 downto 21), DE_OUT(20 downto 18)
+							, EX_RESULT1, EX_RESULT2, Rdst1_Num, Rdst2_Num
 							, DE_OUT(2), DE_OUT(1), DE_OUT(0)
 							, EM_OUT(78 downto 47), EM_OUT(46 downto 15), EM_OUT(14 downto 12), EM_OUT(11 downto 9)
 							, EM_OUT(2), EM_OUT(1), EM_OUT(0)
