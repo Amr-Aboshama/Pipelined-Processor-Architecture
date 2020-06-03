@@ -29,3 +29,5 @@
 
 # Load-use case appears in: LDD, POP
     and can appear in: RET, RTI
+
+# Handling Load-use case of RET, RTI must be handled by arrangment between: HAZARD_DETECTION_UNIT & BRANCH_PREDECTION_UNIT
